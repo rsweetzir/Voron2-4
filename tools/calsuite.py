@@ -237,6 +237,21 @@ def emboss_top(text, cx, cy, z, px, f=30 * 60):
                 hop_travel(x0 + a * px, yy, z, hop=0.2)
                 ext(x0 + b * px, yy, LH, f)
 
+def label_jogs(text, cx, face_y, z, z_text0, row_h, px, depth=0.6):
+    """Raised label built into a single front wall running +X along face_y: the wall itself
+    jogs out (-Y) under each lit pixel run, so the label needs no retracts or travel and the
+    flow stays continuous. The first layer of each pixel row jogs half depth (chamfer, no
+    unsupported overhang). Returns the jog points to print before the wall's front corner."""
+    if z < z_text0 or z >= z_text0 + 5 * row_h - 1e-6:
+        return []
+    k = (z - z_text0 + 1e-6) / row_h
+    row, dd = 4 - int(k), depth if k % 1 > LH / row_h - 1e-6 else depth / 2
+    x0, pts = cx - text_width(text, px) / 2, []
+    for a, b in row_runs(text, row):
+        xa, xb = x0 + a * px, x0 + b * px
+        pts += [(xa, face_y), (xa, face_y - dd), (xb, face_y - dd), (xb, face_y)]
+    return pts
+
 # ---- travel that never crosses printed parts
 def route(x, y, front_gap_y, z_clear=None):
     """Lift, step out to the gap in front of the current row, slide along it, then go to (x, y)."""
@@ -447,9 +462,8 @@ for i, z, h in layer_list(BASE_H + BAND * len(SPEED_VOLS), start=round(BASE_H + 
     g(f"G1 Z{z:.3f} F1200")
     hop_travel(ring[0][0], ring[0][1], z)
     f = vol / (h * w5) * 60
-    for p in ring[1:] + ring[:1]:
+    for p in label_jogs(str(vol), 150, ring[0][1], z, BASE_H + b * BAND + 0.5, 0.6, 0.9) + ring[1:] + ring[:1]:
         ext(p[0], p[1], h, f, w5)
-    emboss_front(str(vol), 150, cy - hy + d - w5 / 2, z, BASE_H + b * BAND + 0.5, 0.6, 0.9)
 state["safe_z"] = max(state["safe_z"], BASE_H + BAND * len(SPEED_VOLS))
 g("EXCLUDE_OBJECT_END NAME=max_flow")
 wait_spot(cy - hy - 5 - 6)
