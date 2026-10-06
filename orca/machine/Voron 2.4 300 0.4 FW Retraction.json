@@ -1,0 +1,24 @@
+{
+    "from": "User",
+    "inherits": "Voron Voron 2.4 300 0.4 nozzle",
+    "machine_start_gcode": ";M190 S[bed_temperature_initial_layer_single]\n;M109 S[nozzle_temperature_initial_layer]\nPRINT_START EXTRUDER=[nozzle_temperature_initial_layer] BED=[bed_temperature_initial_layer_single] FILAMENT=[filament_type]\n; You can use following code instead if your PRINT_START macro support Chamber and print area bedmesh\n; PRINT_START EXTRUDER=[nozzle_temperature_initial_layer] BED=[bed_temperature_initial_layer_single] Chamber=[chamber_temperature] PRINT_MIN={first_layer_print_min[0]},{first_layer_print_min[1]} PRINT_MAX={first_layer_print_max[0]},{first_layer_print_max[1]}",
+    "name": "Voron 2.4 300 0.4 FW Retraction",
+    "printer_extruder_id": [
+        "1"
+    ],
+    "printer_extruder_variant": [
+        "Direct Drive Standard"
+    ],
+    "printer_settings_id": "Voron 2.4 300 0.4 FW Retraction",
+    "retract_before_wipe": [
+        "100%"
+    ],
+    "retraction_length": [
+        "0.1"
+    ],
+    "use_firmware_retraction": "1",
+    "version": "2.4.0.2",
+    "wipe": [
+        "0"
+    ]
+}
