@@ -35,7 +35,7 @@ Do not add `M190`/`M109` before it; `PRINT_START` handles heating.
 | Folder | Contents |
 |---|---|
 | `klipper/` | `printer.cfg`, `macros.cfg`, `ebb_extruder.cfg`, `KAMP_Settings.cfg` |
-| `firmware/` | Klipper `make menuconfig` settings for the SKR Pro (F407, 32KiB bootloader, USB) and EBB (G0B1, no bootloader): `ebb.config` USB, `ebb-can.config` CAN on PB0/PB1 at 1 Mbit/s |
+| `firmware/` | Klipper `make menuconfig` settings for the SKR Pro (F407, 32KiB bootloader, USB) and EBB (G0B1, no bootloader): `ebb.config` USB, `ebb-can.config` CAN on PB0/PB1 at 1 Mbit/s (switch-over steps in `ebb-can.md`) |
 | `firmware/candlelight/` | candleLight build, flashing steps and `can0` network config for the USB-CAN adapter (STM32F072) |
 | `orca/` | OrcaSlicer 2.4 user presets (machine / filament / process) |
 | `tools/` | `sync-from-printer.sh` pulls the live files into this repo |
