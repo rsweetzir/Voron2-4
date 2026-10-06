@@ -152,7 +152,7 @@
   <text x="1390" y="472" class="small">CAN with the EBB.</text>
 
   <!-- ================================================================ PANEL 2 -->
-  <text x="40" y="722" class="panel">2. Later — Eddy Duo added, inductive probe removed</text>
+  <text x="40" y="722" class="panel">2. Later — Eddy Duo added: orange &amp; white split to both boards, termination stays on the EBB</text>
   <rect x="30" y="740" width="1540" height="330" fill="none" stroke="#ccc" stroke-width="1.5" rx="10"/>
 
   <rect x="60" y="780" width="270" height="120" class="box"/>
@@ -161,46 +161,50 @@
   <rect x="80" y="854" width="44" height="28" class="term" rx="4"/><text x="85" y="873" class="small">120Ω</text>
   <text x="132" y="873" class="lbl on">ON (end #1)</text>
 
-  <path d="M330,800 L760,800" class="w24"/>
-  <path d="M330,818 L760,818" class="w5"/>
-  <path d="M330,836 L760,836" class="wgnd"/>
-  <path d="M330,854 L760,854" class="wh"/>
-  <path d="M330,872 L760,872" class="wlo"/><path d="M330,872 L760,872" class="wl"/>
-  <path d="M330,890 L760,890" class="wpe"/>
+  <!-- umbilical runs straight to the EBB; branches to the Eddy tap off at the splice dots -->
+  <path d="M330,800 L1000,800" class="w24"/>
+  <path d="M330,818 L790,818" class="w5"/>
+  <path d="M330,836 L1000,836" class="wgnd"/>
+  <path d="M330,854 L1000,854" class="wh"/>
+  <path d="M330,872 L1000,872" class="wlo"/><path d="M330,872 L1000,872" class="wl"/>
+  <path d="M330,890 L700,890" class="wpe"/>
   <text x="440" y="784" class="sub">6-wire umbilical (unchanged)</text>
-
-  <rect x="760" y="780" width="150" height="125" class="box"/>
-  <text x="775" y="810" class="title">Toolhead</text>
-  <text x="775" y="832" class="title">split</text>
-  <text x="775" y="856" class="small">short stubs,</text>
-  <text x="775" y="872" class="small">keep &lt; ~10 cm</text>
+  <text x="480" y="912" class="small">green → toolhead metal, as in panel 1</text>
+  
+  <!-- splice area -->
+  <rect x="770" y="785" width="170" height="245" fill="none" stroke="#999" stroke-width="1.5" stroke-dasharray="4 4" rx="8"/>
+  <text x="780" y="1050" class="lbl" font-weight="bold">Toolhead splice</text>
+  <text x="780" y="1066" class="small">(Wago / solder / 2nd CAN header)</text>
 
   <!-- EBB -->
   <rect x="1000" y="765" width="270" height="130" class="box"/>
-  <text x="1020" y="797" class="title">BTT EBBCan</text>
-  <text x="1020" y="820" class="sub">yellow · black · orange · white</text>
-  <rect x="1020" y="836" width="44" height="28" class="term" rx="4"/><text x="1025" y="855" class="small">120Ω</text>
-  <text x="1072" y="855" class="lbl off">OFF (jumper removed)</text>
-  <text x="1020" y="884" class="small">probe port now empty</text>
-  <path d="M910,800 L1000,800" class="w24"/>
-  <path d="M910,815 L1000,815" class="wgnd"/>
-  <path d="M910,830 L1000,830" class="wh"/>
-  <path d="M910,845 L1000,845" class="wlo"/><path d="M910,845 L1000,845" class="wl"/>
+  <text x="1060" y="790" class="title">BTT EBBCan</text>
+  <text x="1012" y="804" class="small">24V</text><text x="1012" y="840" class="small">GND</text><text x="1012" y="858" class="small">H</text><text x="1012" y="876" class="small">L</text>
+  <rect x="1110" y="836" width="44" height="28" class="term" rx="4"/><text x="1115" y="855" class="small">120Ω</text>
+  <text x="1162" y="855" class="lbl on">ON (keep)</text>
+  <text x="1110" y="884" class="small">bus end #2</text>
 
   <!-- Eddy -->
   <rect x="1000" y="920" width="270" height="130" class="boxfut"/>
-  <text x="1020" y="952" class="title">BTT Eddy Duo</text>
-  <text x="1020" y="974" class="sub">RP2040 · switch set to CAN</text>
-  <text x="1020" y="992" class="small">CAN firmware: RX gpio4, TX gpio5</text>
-  <rect x="1020" y="1006" width="44" height="28" class="term" rx="4"/><text x="1025" y="1025" class="small">120Ω</text>
-  <text x="1072" y="1025" class="lbl on">ON (end #2)</text>
-  <path d="M880,905 L880,950 L1000,950" class="wh"/>
-  <path d="M895,905 L895,965 L1000,965" class="wlo"/><path d="M895,905 L895,965 L1000,965" class="wl"/>
-  <path d="M850,905 L850,980 L1000,980" class="wgnd"/>
-  <path d="M835,905 L835,995 L960,995" class="w5 dash"/>
-  <path d="M820,905 L820,1010 L960,1010" class="w24 dash"/>
-  <text x="700" y="1040" class="small">power: red 5 V or yellow 24 V,</text>
-  <text x="700" y="1056" class="small">whichever Eddy needs (see →)</text>
+  <text x="1060" y="945" class="title">BTT Eddy Duo</text>
+  <text x="1110" y="966" class="small">switch → CAN</text>
+  <text x="1110" y="983" class="small">fw: RX gpio4, TX gpio5</text>
+  <rect x="1110" y="1000" width="44" height="28" class="term" rx="4"/><text x="1115" y="1019" class="small">120Ω</text>
+  <text x="1162" y="1019" class="lbl off">OFF</text>
+
+  <!-- branches -->
+  <path d="M900,854 L900,960 L1000,960" class="wh"/>
+  <path d="M920,872 L920,975 L1000,975" class="wlo"/><path d="M920,872 L920,975 L1000,975" class="wl"/>
+  <path d="M870,836 L870,990 L1000,990" class="wgnd"/>
+  <path d="M790,818 L790,1005 L1000,1005" class="w5 dash"/>
+  <path d="M830,800 L830,1020 L1000,1020" class="w24 dash"/>
+  <circle cx="900" cy="854" r="6" fill="#ff7f0e" stroke="#333" stroke-width="1"/>
+  <circle cx="920" cy="872" r="6" fill="#fff" stroke="#333" stroke-width="1.5"/>
+  <circle cx="870" cy="836" r="6" fill="#222"/>
+  <circle cx="830" cy="800" r="6" fill="#f2c200" stroke="#333" stroke-width="1"/>
+  <text x="1012" y="964" class="small">H</text><text x="1012" y="979" class="small">L</text>
+  <text x="1012" y="994" class="small">GND</text>
+  <text x="1012" y="1009" class="small">5V?</text><text x="1012" y="1024" class="small">24V?</text>
 
   <!-- warning -->
   <rect x="1300" y="765" width="250" height="285" class="warn" rx="8"/>
@@ -224,5 +228,5 @@
   <text x="50" y="1166" class="lbl">• Red is 5 V here, not 24 V: label both ends so nobody assumes red = 24 V. Before plugging in a board, meter yellow–black ≈ 24 V and red–black ≈ 5 V.</text>
   <text x="50" y="1188" class="lbl">• Green chassis ground: frame / PE at the frame end, toolhead metal at the far end. Never use it as a return for 24 V, 5 V or CAN.</text>
   <text x="50" y="1210" class="lbl">• Wire to each board's silkscreen (24V / GND / H / L), not by pin position. Swapped orange/white gives no nodes in canbus_query.py.</text>
-  <text x="50" y="1232" class="lbl">• Moving 120 Ω from the EBB to the Eddy Duo is the only jumper change between panels. Steps: firmware/ebb-can.md, firmware/candlelight/README.md.</text>
+  <text x="50" y="1232" class="lbl">• Both toolhead boards sit at the same end of the bus, so one 120 Ω there is enough: keep the EBB's ON, set the Eddy's OFF. Steps: firmware/ebb-can.md, firmware/candlelight/README.md.</text>
 </svg>
