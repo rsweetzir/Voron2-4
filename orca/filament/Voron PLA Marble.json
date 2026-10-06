@@ -1,0 +1,27 @@
+{
+    "from": "User",
+    "inherits": "Generic PLA template @Voron Voron 2.4 300 0.4 nozzle",
+    "name": "Voron PLA Marble",
+    "filament_settings_id": [
+        "Voron PLA Marble"
+    ],
+    "version": "2.4.0.2",
+    "nozzle_temperature": [
+        "195"
+    ],
+    "nozzle_temperature_initial_layer": [
+        "200"
+    ],
+    "filament_flow_ratio": [
+        "1"
+    ],
+    "filament_max_volumetric_speed": [
+        "13.5"
+    ],
+    "enable_pressure_advance": [
+        "0"
+    ],
+    "filament_start_gcode": [
+        "; Voron PLA Marble (Elegoo marble-filled): Klipper owns PA and retraction\nSET_PRESSURE_ADVANCE ADVANCE=0.05\nSET_RETRACTION RETRACT_LENGTH=0.8 RETRACT_SPEED=40 UNRETRACT_SPEED=30"
+    ]
+}

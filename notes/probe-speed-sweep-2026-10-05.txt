@@ -1,0 +1,14 @@
+print state: cancelled
+speed 1.25 mm/s: longest identical run=3 | 0.3825 0.3825 0.3825 0.3800 0.3775 0.3800 0.3800 0.3775 0.3775 0.3750|// probe accuracy results: maximum 0.382500, minimum 0.375000, range 0.007500, average 0.379500, median 0.380000, standard deviation 0.002449
+speed 2.5 mm/s: longest identical run=4 | 0.3750 0.3750 0.3775 0.3750 0.3750 0.3750 0.3750 0.3725 0.3725 0.3750|// probe accuracy results: maximum 0.377500, minimum 0.372500, range 0.005000, average 0.374750, median 0.375000, standard deviation 0.001346
+speed 3.75 mm/s: longest identical run=5 | 0.3700 0.3700 0.3700 0.3700 0.3700 0.3675 0.3675 0.3650 0.3675 0.3675|// probe accuracy results: maximum 0.370000, minimum 0.365000, range 0.005000, average 0.368500, median 0.368750, standard deviation 0.001658
+speed 5 mm/s: longest identical run=6 | 0.3625 0.3625 0.3625 0.3625 0.3625 0.3625 0.3650 0.3625 0.3625 0.3625|// probe accuracy results: maximum 0.365000, minimum 0.362500, range 0.002500, average 0.362750, median 0.362500, standard deviation 0.000750
+speed 6.25 mm/s: longest identical run=3 | 0.3600 0.3600 0.3600 0.3575 0.3600 0.3600 0.3625 0.3600 0.3625 0.3625|// probe accuracy results: maximum 0.362500, minimum 0.357500, range 0.005000, average 0.360500, median 0.360000, standard deviation 0.001500
+speed 7.5 mm/s: longest identical run=4 | 0.3600 0.3575 0.3600 0.3625 0.3600 0.3625 0.3625 0.3625 0.3625 0.3600|// probe accuracy results: maximum 0.362500, minimum 0.357500, range 0.005000, average 0.361000, median 0.361250, standard deviation 0.001658
+speed 10 mm/s: longest identical run=3 | 0.3500 0.3500 0.3475 0.3475 0.3500 0.3475 0.3475 0.3500 0.3500 0.3500|// probe accuracy results: maximum 0.350000, minimum 0.347500, range 0.002500, average 0.349000, median 0.350000, standard deviation 0.001225
+speed 12.5 mm/s: longest identical run=7 | 0.3375 0.3350 0.3375 0.3375 0.3375 0.3375 0.3375 0.3375 0.3375 0.3400|// probe accuracy results: maximum 0.340000, minimum 0.335000, range 0.005000, average 0.337500, median 0.337500, standard deviation 0.001118
+speed 15 mm/s: longest identical run=9 | 0.3300 0.3300 0.3300 0.3300 0.3300 0.3300 0.3300 0.3300 0.3300 0.3325|// probe accuracy results: maximum 0.332500, minimum 0.330000, range 0.002500, average 0.330250, median 0.330000, standard deviation 0.000750
+speed 20 mm/s: longest identical run=2 | 0.3325 0.3275 0.3300 0.3300 0.3325 0.3300 0.3300 0.3325 0.3275 0.3300|// probe accuracy results: maximum 0.332500, minimum 0.327500, range 0.005000, average 0.330250, median 0.330000, standard deviation 0.001750
+  (no 3 identical readings at 20 mm/s)
+
+[exited with code 0]
