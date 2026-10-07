@@ -1,0 +1,31 @@
+First-layer tests 2026-10-07 (tools/firstlayer.py, 9 x 30 mm single-layer squares, PLA 210/60)
+Ratings by eye: far = nozzle too far, close = too close. Layout as you face the printer.
+
+1. Warm-nozzle mesh, parked at Z20 during soak (soak skipped), z_offset -0.008: "far from perfect"
+2. Cold nozzle (PREHEAT=0), Z20 park, user babystepped +0.20 during the first square:
+     back:  far        far         far
+     mid:   close      PERFECT     close
+     front: (adjusting) close      way too close
+   -> saved z_offset -0.208
+   Cold vs warm meshes differed by up to 0.29 mm in probing order (front rows first):
+   the probe drifted while warming during QGL and the mesh.
+3. MESH_DRIFT_CHECK, parked at Z3 for the 10 min soak, nozzle 150: centre moved 0.0075 mm
+   over a full 9x9 mesh. Drift fixed. PRINT_START now parks at Z3 (PARK_Z).
+4. Normal order (front first), z_offset -0.208 (a +0.25 paper babystep made during the soak was
+   lost: the soak's PAUSE/RESUME restores the saved gcode offset):
+     back:  good          bit far (curl)   close
+     mid:   much closer   close            too close (jam)
+     front: close         much closer      too close (jam)
+   -> user saved z_offset -0.458 (paper value)
+5. Reversed order (back first), z_offset -0.458, no babysteps:
+     back:  too far   far        good
+     mid:   good      PERFECT    too close
+     front: good      good       good
+
+Conclusions
+- The inductive probe's trigger point moves with temperature. The cold, warm and Z3-soaked
+  states differ by up to ~0.45 mm in Z offset. Soaking at Z3 makes it repeatable.
+- Remaining errors follow position, not print order: back-left/back-centre too far,
+  middle-right too close. Next: check under the sheet there; X twist compensation for MR;
+  Y twist needs a newer Klipper. Revisit all of this when the Eddy Duo replaces the probe.
+- Babysteps made during the soak are lost on resume; adjust after the purge.
