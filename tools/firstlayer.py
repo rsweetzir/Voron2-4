@@ -14,6 +14,7 @@ COLS = {"L": 40.0, "C": 150.0, "R": 260.0}
 ROWS = {"F": 40.0, "M": 150.0, "B": 260.0}
 PRINT_F, TRAVEL_F = 30 * 60, 200 * 60
 OUT = sys.argv[1] if len(sys.argv) > 1 else "first_layer_test_9sq.gcode"
+START_EXTRA = " ".join(sys.argv[2:])          # extra PRINT_START params, e.g. PREHEAT=0
 
 out, pos = [], [0.0, 0.0]
 g = out.append
@@ -56,7 +57,7 @@ for name, cx, cy in squares:
     h = SIZE / 2
     poly = f"[{cx - h:.1f},{cy - h:.1f}],[{cx + h:.1f},{cy - h:.1f}],[{cx + h:.1f},{cy + h:.1f}],[{cx - h:.1f},{cy + h:.1f}]"
     g(f"EXCLUDE_OBJECT_DEFINE NAME={name} CENTER={cx:.1f},{cy:.1f} POLYGON=[{poly}]")
-g(f"PRINT_START EXTRUDER={TEMP} BED={BED} FILAMENT=PLA")
+g(f"PRINT_START EXTRUDER={TEMP} BED={BED} FILAMENT=PLA {START_EXTRA}".rstrip())
 g(f"SET_PRESSURE_ADVANCE ADVANCE={PA}")
 g("G90"); g("M83"); g("M107")
 # Snake through the grid: front row left->right, middle right->left, back left->right
