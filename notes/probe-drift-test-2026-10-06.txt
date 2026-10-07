@@ -1,0 +1,44 @@
+PROBE_DRIFT_TEST BED=55 MINUTES=25 INTERVAL=60 NOZZLE=150   (2026-10-06 20:38, PLA bed temp)
+Inductive probe on EBB PB9 over the Z homing spot (probe at 150,175). Homed cold, Z motors held.
+dz = change in bed contact height vs the cold baseline (positive = bed surface higher).
+
+t(min) bed(C)  dz(mm)
+ 0     28.6   +0.000   baseline, cold
+ 1     52.1   +0.045
+ 2     55.7   +0.095   peak
+ 3     55.3   +0.085
+ 4     55.1   +0.073
+ 5     55.0   +0.065
+ 6     55.1   +0.063
+ 7     55.0   +0.045
+ 8     54.9   +0.030
+ 9     55.1   +0.033
+10     55.1   +0.033
+11     55.1   +0.033
+12     55.0   +0.028
+13     55.0   +0.010
+14     55.0   +0.020
+15     54.9   +0.020
+16     54.9   +0.013
+17     55.0   +0.005
+18     55.2   +0.000
+19     54.9   -0.013
+20     55.1   -0.008
+21     55.0   -0.015
+22     54.8   -0.013
+23     55.1   -0.010
+24     54.8   -0.013
+25     55.0   -0.020
+
+Findings
+- The bed reaches 55C in about 1 min, but the probed height keeps moving for the whole 25 min.
+  It jumps +0.095 mm in the first 2 min, falls quickly until about 8 min, then creeps down at
+  about 0.0025 mm/min. Total swing is 0.115 mm, over half a 0.2 mm first layer.
+- Before this change PRINT_START had no soak below 80C, so QGL, Z homing and the mesh ran in
+  the first 1-3 min, near the peak. That alone can put the first layer 0.06-0.1 mm off.
+- After a 10 min soak the remaining drift is about 0.03-0.05 mm over the next 15 min, and the
+  Z re-home after the soak cancels the offset at print start. PLA_SOAK set to 10.
+- First sample after each 60 s dwell at Z10 reads low: about 0.03-0.06 mm early in the test,
+  0.06-0.10 mm after 17 min. The tolerance retry rejects it (samples_tolerance 0.015), so
+  results stay good, but a sample is wasted each time. Likely the probe warming while it waits
+  above the hot bed. Watch it in meshes; a throwaway first sample would fix it.
