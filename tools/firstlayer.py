@@ -14,7 +14,8 @@ COLS = {"L": 40.0, "C": 150.0, "R": 260.0}
 ROWS = {"F": 40.0, "M": 150.0, "B": 260.0}
 PRINT_F, TRAVEL_F = 30 * 60, 200 * 60
 OUT = sys.argv[1] if len(sys.argv) > 1 else "first_layer_test_9sq.gcode"
-START_EXTRA = " ".join(sys.argv[2:])          # extra PRINT_START params, e.g. PREHEAT=0
+REVERSE = "--reverse" in sys.argv[2:]         # back row first, to tell time from position
+START_EXTRA = " ".join(a for a in sys.argv[2:] if a != "--reverse")  # extra PRINT_START params
 
 out, pos = [], [0.0, 0.0]
 g = out.append
@@ -61,8 +62,9 @@ g(f"PRINT_START EXTRUDER={TEMP} BED={BED} FILAMENT=PLA {START_EXTRA}".rstrip())
 g(f"SET_PRESSURE_ADVANCE ADVANCE={PA}")
 g("G90"); g("M83"); g("M107")
 # Snake through the grid: front row left->right, middle right->left, back left->right
-for row in ("F", "M", "B"):
-    order = "LCR" if row != "M" else "RCL"
+# (--reverse: back row right->left, middle left->right, front right->left)
+for row in ("B", "M", "F") if REVERSE else ("F", "M", "B"):
+    order = ("RCL" if row != "M" else "LCR") if REVERSE else ("LCR" if row != "M" else "RCL")
     for col in order:
         name = row + col
         g(f"EXCLUDE_OBJECT_START NAME={name}")
