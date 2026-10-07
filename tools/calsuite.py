@@ -13,7 +13,7 @@ Prints, front to back, one test at a time (OrcaSlicer models sliced by tools/orc
                                                               -> asks: last good band
   3. Pressure-advance triangles with solid-filled bottoms (no square base), each printed
      on its own from bottom to top at its PA value           -> asks: sharpest triangle
-  4. Flow blocks (25 x 12.5mm), all printed together, flow switched per block
+  4. Flow blocks (25 x 12.5mm, 1.65mm solid), each printed on its own at its flow
                                                               -> asks: smoothest top
   5. Retraction: Orca's retraction_tower (two pillars), retraction length changes every
      1mm (one tick on the pillars)                            -> asks: lowest clean length
@@ -34,7 +34,8 @@ Usage: calsuite.py MATERIAL OUT.gcode NAME ORCA_DIR [FROM=test ANSWER=value ...]
        orca_calib.py (tools/calsuite.sh runs the whole thing).
        Resume: FROM=speed|pa|flow|retract|tolerance writes only that test and the ones after
        it, with the earlier answers given as TEMP= MAX_FLOW= PA= FLOW= RETRACT_LEN= (needed:
-       TEMP for anything after the tower). Earlier tests are treated as still on the bed.
+       TEMP for anything after the tower). The bed must be EMPTY: PRINT_START's homing, soak
+       park, QGL and purge do not avoid earlier tests (only the suite's own moves are checked).
 """
 import math, os, re, sys
 
@@ -320,7 +321,7 @@ TRI_SIDE = 22.0
 TRI_H = TRI_SIDE * math.sqrt(3) / 2
 PA_X = [35 + i * 30 for i in range(len(PA_VALUES))]     # 35 .. 275
 PA_TOP = BASE_H + 0.8                                   # 2 solid layers + 4 wall layers
-FLOW_X, FLOW_W, FLOW_D, FLOW_H = [70.0, 110.0, 150.0, 190.0, 230.0], 25.0, 12.5, 3.0
+FLOW_X, FLOW_W, FLOW_D, FLOW_H = [70.0, 110.0, 150.0, 190.0, 230.0], 25.0, 12.5, 1.65   # 8 solid layers
 
 ROW = dict(temp=25, speed=101, pa=176, flow=207, last=254)   # Y centre of each row, front to back
 TOWER = Orca("temp", 150, ROW["temp"])
@@ -359,10 +360,15 @@ TRI_OBJECTS = [(f"pa_{k + 1}", rect(PA_X[k] - TRI_SIDE / 2, ROW["pa"] - TRI_H / 
 if PA_TOP > LOW_H or PA_X[1] - PA_X[0] - TRI_SIDE < TRI_NOZZLE_GAP:
     sys.exit("PA triangles printed one by one must stay low and at least TRI_NOZZLE_GAP apart")
 
+FLOW_OBJECTS = [(f"flow_{k + 1}", rect(cx - FLOW_W / 2, ROW["flow"] - FLOW_D / 2, cx + FLOW_W / 2, ROW["flow"] + FLOW_D / 2), FLOW_H + LH)
+                for k, cx in enumerate(FLOW_X)]
+if FLOW_H + LH > LOW_H or FLOW_X[1] - FLOW_X[0] - FLOW_W < LOW_GAP:
+    sys.exit("flow blocks printed one by one must stay under LOW_H and at least LOW_GAP apart")
+
 def objects():
-    """Exclude-objects in print order: the PA row is one object per triangle."""
+    """Exclude-objects in print order: one per PA triangle and per flow block."""
     for n, r, h in PLAN:
-        yield from (TRI_OBJECTS if n == "pa_triangles" else [(n, r, h)])
+        yield from {"pa_triangles": TRI_OBJECTS, "flow": FLOW_OBJECTS}.get(n, [(n, r, h)])
 
 def check_clearance(plan):
     """Stealthburner clearance for tests printed one after another. A finished test must be
@@ -500,32 +506,37 @@ ask("pa", f"{NAME} 3/6: pressure advance",
     f"Each triangle was printed on its own with its PA value printed on its filled bottom; walls ran at {VMAX}mm/s. Pick the one with the sharpest corners and even line width.",
     PA_VALUES, [fmt(p) for p in PA_VALUES])
 
-# ================================================================ 4. flow blocks, printed together
+# ================================================================ 4. flow blocks, each on its own
 g("_CAL_APPLY WHAT=pa")
 prime(gap)
 mark["flow"] = len(out)
 cy = ROW["flow"]
-g("EXCLUDE_OBJECT_START NAME=flow")
-route(FLOW_X[0] - FLOW_W / 2, cy - FLOW_D / 2, gap)
-g(f"G1 Z{FIRST_LH + 0.4:.3f} F1200")
-g("M107")
-for i, z, h in layer_list(FLOW_H):
-    g(f";LAYER Z:{z:.2f}"); g(f"G1 Z{z:.3f} F1200"); fan_on(z)
-    top = z > FLOW_H - 5 * LH
-    for cx, fl in zip(FLOW_X, FLOWS):
-        g(f"M221 S{fl}")
-        solid_rect(cx - FLOW_W / 2, cy - FLOW_D / 2, cx + FLOW_W / 2, cy + FLOW_D / 2, z, h, i,
+for k, (cx, fl) in enumerate(zip(FLOW_X, FLOWS)):
+    x0, y0, x1, y1 = cx - FLOW_W / 2, cy - FLOW_D / 2, cx + FLOW_W / 2, cy + FLOW_D / 2
+    g(f"EXCLUDE_OBJECT_START NAME=flow_{k + 1}")
+    if k == 0:
+        route(x0, y0, gap)
+    else:                                               # over the finished blocks, then down
+        retract(); g(f"G1 Z{FLOW_H + LH + 2:.3f} F1200")
+        g(f"G0 X{x0:.3f} Y{y0:.3f} F{TRAVEL_F}")
+        pos[0], pos[1] = x0, y0
+    g(f"G1 Z{FIRST_LH + 0.4:.3f} F1200")
+    g(f"; flow block {k + 1}: {fl}%"); g(f"M221 S{fl}"); g(f"M117 Flow {fl}%")
+    g("M107")
+    for i, z, h in layer_list(FLOW_H):
+        g(f";LAYER Z:{z:.2f}"); g(f"G1 Z{z:.3f} F1200"); fan_on(z)
+        top = z > FLOW_H - 5 * LH
+        solid_rect(x0, y0, x1, y1, z, h, i,
                    FIRST_F if i == 0 else TEST_F, FIRST_F if i == 0 else (50 * 60 if top else TEST_F))
-z = round(FLOW_H + LH, 3)
-g(f"G1 Z{z:.3f} F1200"); g("M221 S100")
-for cx, fl in zip(FLOW_X, FLOWS):
+    z = round(FLOW_H + LH, 3)
+    g(f"G1 Z{z:.3f} F1200"); g("M221 S100")
     emboss_top(f"{fl}%", cx, cy, z, 1.2)
+    g(f"EXCLUDE_OBJECT_END NAME=flow_{k + 1}")
 state["safe_z"] = max(state["safe_z"], FLOW_H + LH)
-g("EXCLUDE_OBJECT_END NAME=flow")
 gap = gap_behind("flow")
 wait_spot(gap)
 ask("flow", f"{NAME} 4/6: flow",
-    "Each block shows its flow on top. Pick the smoothest, fully closed top surface.",
+    "Each block was printed on its own and shows its flow on top. Pick the smoothest, fully closed top surface.",
     FLOWS, [f"{f}%" for f in FLOWS])
 
 # ================================================================ 5. Orca retraction tower
@@ -571,13 +582,14 @@ g("PRINT_END")
 
 # ================================================================ resume: later tests only
 SECTION_OBJECTS = dict(temp=["temp_tower"], speed=["max_flow"], pa=[n for n, r, h in TRI_OBJECTS],
-                       flow=["flow"], retract=["retraction"], tolerance=["tolerance"])
+                       flow=[n for n, r, h in FLOW_OBJECTS], retract=["retraction"], tolerance=["tolerance"])
 already = [n for sec in SECTIONS[:SECTIONS.index(FROM)] for n in SECTION_OBJECTS[sec]]
 if FROM != "temp":
     body = out[mark[FROM]:]
     out[:] = []
     g(f"; {NAME} calibration suite v5 ({MAT}), RESUMED from {FROM} with " + " ".join(f"{k}={v}" for k, v in ANSWERS.items()))
-    g(f"; already printed (treated as still on the bed): {', '.join(already)}")
+    g(f"; already printed: {', '.join(already)}. START ON AN EMPTY BED: homing, the soak park, QGL and")
+    g(";   the purge do not avoid earlier tests (the 70mm tower stands in the QGL path)")
     for name, r, h in objects():
         if name in already:
             continue
@@ -589,6 +601,7 @@ if FROM != "temp":
     for k, v in ANSWERS.items():
         if k not in ("temp", "retract_len"):
             g(f"SET_GCODE_VARIABLE MACRO=_CAL VARIABLE={k} VALUE={v}")
+    g('RESPOND MSG="Resumed calibration: the bed must be empty (earlier tests removed)"')
     g(f"PRINT_START EXTRUDER={ANSWERS['temp']} BED={P['bed']} FILAMENT={MAT}")   # fresh adaptive mesh
     g("_CAL_APPLY WHAT=all")                             # earlier answers: temp, retraction, PA, flow
     g("SET_VELOCITY_LIMIT VELOCITY=300 ACCEL=3000 SQUARE_CORNER_VELOCITY=5")
