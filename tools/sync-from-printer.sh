@@ -4,7 +4,7 @@
 set -e
 cd "$(dirname "$0")/.."
 rsync -a yeg2-4:printer_data/config/printer.cfg yeg2-4:printer_data/config/macros.cfg yeg2-4:printer_data/config/calibration.cfg \
-      yeg2-4:printer_data/config/ebb_extruder.cfg yeg2-4:printer_data/config/KAMP_Settings.cfg klipper/
+      yeg2-4:printer_data/config/ebb_extruder.cfg yeg2-4:printer_data/config/KAMP_Settings.cfg yeg2-4:printer_data/config/eddy.cfg klipper/
 rsync -a yeg2-4:fw/skrpro.config yeg2-4:fw/ebb.config yeg2-4:fw/ebb-can.config yeg2-4:fw/eddy-can.config firmware/
 rsync -a --exclude 'base/' --exclude '*.bak-*' "$HOME/snap/orcaslicer/current/.config/OrcaSlicer/user/default/" orca/
 # Keep MCU serial IDs out of the public repo.
