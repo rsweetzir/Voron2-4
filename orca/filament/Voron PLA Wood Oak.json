@@ -27,5 +27,17 @@
     "compatible_prints": [
         "Voron 0.20mm PLA Wood"
     ],
-    "compatible_prints_condition": ""
+    "compatible_prints_condition": "",
+    "filament_z_hop": [
+        "0.6"
+    ],
+    "filament_z_hop_types": [
+        "Normal Lift"
+    ],
+    "filament_retract_lift_enforce": [
+        "All Surfaces"
+    ],
+    "filament_retract_when_changing_layer": [
+        "1"
+    ]
 }
