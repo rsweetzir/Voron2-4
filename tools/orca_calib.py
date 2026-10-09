@@ -16,16 +16,29 @@ using this repo's Voron presets (walls and infill at SPEED, the filament's top s
 G-code has no start/end G-code and no temperatures; calsuite.py places it on the plate and
 adds the per-band temperature / volumetric speed / retraction changes.
 
-Needs a Python with DracoPy, manifold3d and numpy (e.g. a venv) and the OrcaSlicer snap.
+Needs a Python with DracoPy, manifold3d and numpy (e.g. a venv) and OrcaSlicer: the macOS app
+in /Applications, or the Linux snap (ORCA_APP / ORCA_RESOURCES / ORCA_BIN override the paths).
+The presets come from this repo's orca/ folder.
 """
 import glob, json, os, shutil, struct, subprocess, sys
 import DracoPy, manifold3d, numpy as np
 
 KIND, ARGS = sys.argv[1], sys.argv[2:]
-ORCA = "/snap/orcaslicer/current/usr/local/share/OrcaSlicer"
-USER = os.path.expanduser("~/snap/orcaslicer/current/.config/OrcaSlicer/user/default")
-WORK = os.path.expanduser("~/snap/orcaslicer/common/calsuite")   # the snap can only read files here
-MACHINE, MACHINE_SYS = "Voron 2.4 300 0.4 FW Retraction", "Voron Voron 2.4 300 0.4 nozzle"
+if sys.platform == "darwin":
+    _app = os.environ.get("ORCA_APP", "/Applications/OrcaSlicer.app")
+    ORCA = os.environ.get("ORCA_RESOURCES", f"{_app}/Contents/Resources")
+    ORCA_BIN = os.environ.get("ORCA_BIN", f"{_app}/Contents/MacOS/OrcaSlicer")
+    WORK = os.path.expanduser("~/.cache/calsuite")
+else:
+    ORCA = os.environ.get("ORCA_RESOURCES", "/snap/orcaslicer/current/usr/local/share/OrcaSlicer")
+    ORCA_BIN = os.environ.get("ORCA_BIN", "/snap/bin/orcaslicer")
+    WORK = os.path.expanduser("~/snap/orcaslicer/common/calsuite")   # the snap can only read files here
+USER = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "orca")   # repo presets
+MACHINE = "Voron 2.4 300 0.4 FW Retraction"   # standalone user printer (no parent preset)
+# The CLI checks process/filament compatibility against the printer's system parent (exit 239,
+# "process not compatible" without one), so the flattened printer is hung off Orca's stock
+# Voron preset; every setting still comes from the repo printer.
+MACHINE_PARENT = "Voron 2.4 300 0.4 nozzle"
 NOZZLE = 0.4
 
 def speeds(v):
@@ -95,7 +108,7 @@ def resolve(name):
     return full
 
 machine = resolve(MACHINE)
-machine.update(type="machine", inherits=MACHINE_SYS, machine_start_gcode="", machine_end_gcode="")
+machine.update(type="machine", inherits=MACHINE_PARENT, machine_start_gcode="", machine_end_gcode="")
 process = resolve("Voron 0.20mm PLA")
 process.update(type="process", name="calsuite " + KIND, print_settings_id="calsuite " + KIND,
                layer_height="0.2", initial_layer_print_height="0.25", skirt_loops="0",
@@ -108,14 +121,15 @@ filament.update(type="filament", name="calsuite " + KIND, filament_settings_id=[
                 filament_start_gcode=[""], enable_pressure_advance=["0"], filament_flow_ratio=["1"])
 filament.update(fil)
 for j in (process, filament):
-    j["compatible_printers"] = [MACHINE_SYS, MACHINE]
+    j["inherits"] = ""                         # flattened above
+    j["compatible_printers"] = [MACHINE_PARENT, MACHINE]
     j["compatible_printers_condition"] = ""
 for name, j in (("machine", machine), ("process", process), ("filament", filament)):
     json.dump(j, open(f"{WORK}/{name}.json", "w"), indent=1)
 
 # ---- slice
 shutil.rmtree(f"{WORK}/out", ignore_errors=True)
-subprocess.run(["/snap/bin/orcaslicer", "--load-settings", "machine.json;process.json",
+subprocess.run([ORCA_BIN, "--load-settings", "machine.json;process.json",
                 "--load-filaments", "filament.json", "--arrange", "0", "--orient", "0",
                 "--slice", "0", "--outputdir", "out", f"{KIND}.stl"], cwd=WORK, check=True)
 with open(out, "w") as o:

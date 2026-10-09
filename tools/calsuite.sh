@@ -4,8 +4,10 @@
 #   tools/calsuite.sh MATERIAL NAME [FROM=pa TEMP=210 MAX_FLOW=14 ...]
 #     e.g. tools/calsuite.sh PLA_PLUS Duramic_PLA_Plus
 #     FROM= resumes at a later test with the earlier answers (see calsuite.py)
-# MATERIAL is a calsuite.py PROFILES key. Needs the OrcaSlicer snap and a Python with
-# DracoPy, manifold3d and numpy ($CALSUITE_PYTHON, default ~/.venvs/calsuite; set it up with
+#     OUT_DIR=dir tools/calsuite.sh ...  writes the G-code to dir instead of uploading it
+# MATERIAL is a calsuite.py PROFILES key. Needs OrcaSlicer (macOS app or Linux snap, see
+# orca_calib.py) and a Python with DracoPy, manifold3d and numpy ($CALSUITE_PYTHON, default
+# ~/.venvs/calsuite; set it up with
 #   python3 -m venv ~/.venvs/calsuite && ~/.venvs/calsuite/bin/pip install DracoPy manifold3d numpy)
 set -e
 MAT=$1 NAME=$2
@@ -36,5 +38,10 @@ SPEED_H=30.72                               # 12 bands x 2.56mm
 FROM=$(printf '%s\n' "$@" | sed -n 's/^FROM=//p' | tr 'A-Z' 'a-z')
 OUT="$WORK/${NAME}_calibration_suite_v5${FROM:+_from_$FROM}.gcode"
 python3 calsuite.py "$MAT" "$OUT" "$NAME" "$WORK" "$@"
-curl -sf -F "file=@$OUT" http://192.168.5.240/server/files/upload > /dev/null
-echo "Uploaded $(basename "$OUT") to the printer (not started)."
+if [ -n "$OUT_DIR" ]; then
+    cp "$OUT" "$OUT_DIR"/
+    echo "Wrote $OUT_DIR/$(basename "$OUT") (not uploaded)."
+else
+    curl -sf -F "file=@$OUT" "http://${PRINTER_HOST:-192.168.5.240}/server/files/upload" > /dev/null
+    echo "Uploaded $(basename "$OUT") to the printer (not started)."
+fi
