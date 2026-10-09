@@ -25,5 +25,6 @@
     "internal_solid_infill_pattern": "zig-zag",
     "bottom_surface_pattern": "zig-zag",
     "top_surface_pattern": "zig-zag",
-    "infill_combination": "1"
+    "infill_combination": "1",
+    "slow_down_layers": "3"
 }
