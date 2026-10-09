@@ -66,7 +66,7 @@
     "head_wrap_detect_zone": [],
     "high_current_on_filament_swap": "0",
     "host_type": "octoprint",
-    "inherits": "",
+    "inherits": "Voron 2.4 300 0.4 nozzle",
     "input_shaping_damp_x": "0.1",
     "input_shaping_damp_y": "0.1",
     "input_shaping_emit": "0",
@@ -204,7 +204,7 @@
     "printer_extruder_variant": [
         "Direct Drive Standard"
     ],
-    "printer_model": "Voron Voron 2.4 300",
+    "printer_model": "Voron 2.4 300",
     "printer_notes": "",
     "printer_settings_id": "Voron 2.4 300 0.4 FW Retraction",
     "printer_structure": "undefine",
