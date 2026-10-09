@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Keeps this Mac's OrcaSlicer presets in sync with orca/ (see install-orca-presets.sh).
+     Install: cp tools/orca-preset-sync.plist ~/Library/LaunchAgents/com.voron.orca-preset-sync.plist
+              launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.voron.orca-preset-sync.plist -->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.voron.orca-preset-sync</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/sh</string>
+        <string>/Users/ross/voron-klipper-config/tools/install-orca-presets.sh</string>
+    </array>
+    <key>WatchPaths</key>
+    <array>
+        <string>/Users/ross/voron-klipper-config/orca/machine</string>
+        <string>/Users/ross/voron-klipper-config/orca/process</string>
+        <string>/Users/ross/voron-klipper-config/orca/filament</string>
+    </array>
+    <!-- Directory watches miss in-place file edits; catch those within 5 minutes. -->
+    <key>StartInterval</key>
+    <integer>300</integer>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>/Users/ross/Library/Logs/orca-preset-sync.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/ross/Library/Logs/orca-preset-sync.log</string>
+</dict>
+</plist>
