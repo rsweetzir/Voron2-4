@@ -1,27 +1,23 @@
 #!/bin/sh
 # Restart Klipper without losing the bed state:
 #   - refuses while a print is printing or paused
-#   - refuses while the motors are on (homed): a restart releases them and loses homing/QGL,
-#     which the 2 h idle-timeout deliberately keeps between prints; --release-motors overrides
+#   - notes when the motors are on: a restart releases them and loses homing/QGL (OK after a
+#     print; the next PRINT_START re-homes and levels)
 #   - saves the bed target and the _SOAK_TRACKER bed history (one sample/min)
 #   - RESTART (or FIRMWARE_RESTART with -f), waits for ready
 #   - re-heats the bed to the same target (only if it was on) and restores the
 #     history, so PRINT_START's soak still knows how long the bed has been warm
-# Usage: tools/klipper-restart.sh [-f] [--release-motors]   (PRINTER_HOST overrides 192.168.5.240)
+# Usage: tools/klipper-restart.sh [-f]   (PRINTER_HOST overrides 192.168.5.240)
 set -e
 H="http://${PRINTER_HOST:-192.168.5.240}:7125"
-EP=restart; RELEASE=0
-for a in "$@"; do case "$a" in -f) EP=firmware_restart;; --release-motors) RELEASE=1;; esac; done
+EP=restart; [ "$1" = "-f" ] && EP=firmware_restart
 q() { curl -s -m 5 "$H/printer/objects/query?$1"; }
 gcode() { curl -s -m 30 -X POST -G "$H/printer/gcode/script" --data-urlencode "script=$1" >/dev/null; }
 
 state=$(q "print_stats=state" | python3 -c 'import sys,json;print(json.load(sys.stdin)["result"]["status"]["print_stats"]["state"])')
 case "$state" in printing|paused) echo "Not restarting: print is $state"; exit 1;; esac
 homed=$(q "toolhead=homed_axes" | python3 -c 'import sys,json;print(json.load(sys.stdin)["result"]["status"]["toolhead"]["homed_axes"])')
-if [ -n "$homed" ] && [ "$RELEASE" = 0 ]; then
-    echo "Not restarting: motors are on (homed '$homed'); a restart would drop homing/QGL. Use --release-motors to override."
-    exit 2
-fi
+[ -n "$homed" ] && echo "note: motors are on (homed '$homed'); the restart releases them and drops homing/QGL"
 
 saved=$(q "heater_bed=target&gcode_macro%20_SOAK_TRACKER=history" | python3 -c '
 import sys,json; s=json.load(sys.stdin)["result"]["status"]
