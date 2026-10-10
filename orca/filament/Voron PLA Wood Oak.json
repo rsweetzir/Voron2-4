@@ -22,7 +22,7 @@
         "0"
     ],
     "filament_start_gcode": [
-        "; Voron PLA Wood Oak (wood-filled): Klipper owns PA and retraction\nSET_PRESSURE_ADVANCE ADVANCE=0.05\nSET_RETRACTION RETRACT_LENGTH=0.7 RETRACT_SPEED=40 UNRETRACT_SPEED=30"
+        "; Voron PLA Wood Oak (wood-filled): Klipper owns PA and retraction\nSET_PRESSURE_ADVANCE ADVANCE=0.05\nSET_RETRACTION RETRACT_LENGTH=0.4 RETRACT_SPEED=30 UNRETRACT_SPEED=25"
     ],
     "compatible_prints": [
         "Voron 0.20mm PLA Wood"
@@ -45,5 +45,8 @@
     ],
     "filament_wipe_distance": [
         "1"
+    ],
+    "filament_retraction_minimum_travel": [
+        "2"
     ]
 }

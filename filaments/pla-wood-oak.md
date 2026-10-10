@@ -7,7 +7,7 @@ profile, 230→200°C); answers saved on the printer in variables.cfg (`cal_pla_
 |---|---|---|
 | Nozzle temperature | 205°C (210°C first layer) | E temp tower 230→200°C |
 | Bed temperature | 60°C | |
-| Retraction (firmware) | 0.7mm @ 40mm/s | Stringing pyramids |
+| Retraction (firmware) | 0.4mm @ 30/25mm/s (was 0.7 @ 40) | Stringing pyramids gave 0.7; cut 2026-10-10 after jams from frequent retractions |
 | Pressure advance | 0.05 | PA triangles 0.00→0.08 |
 | Flow ratio | 1.00 | Flow blocks 92→108% |
 | Max volumetric speed | 20 mm³/s | Speed wall 8→24 mm³/s, last good band |
