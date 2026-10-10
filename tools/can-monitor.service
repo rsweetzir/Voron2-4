@@ -1,0 +1,16 @@
+# systemd user service for tools/can_monitor.py on the printer Pi.
+# Install (as the klipper user; linger keeps it running without a login session):
+#   mkdir -p ~/can-monitor ~/.config/systemd/user
+#   cp can_monitor.py ~/can-monitor/ && cp can-monitor.service ~/.config/systemd/user/
+#   loginctl enable-linger && systemctl --user daemon-reload && systemctl --user enable --now can-monitor
+# Log: ~/printer_data/logs/can_monitor.log
+[Unit]
+Description=CAN bus error monitor (logs CAN errors with printer context)
+
+[Service]
+ExecStart=/usr/bin/python3 %h/can-monitor/can_monitor.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=default.target
