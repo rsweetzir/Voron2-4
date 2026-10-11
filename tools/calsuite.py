@@ -64,6 +64,10 @@ PROFILES = {
                      rspeed=40, start_retract=0.6, vmax=60),
     "PETG":     dict(bed=80, temps=[248, 244, 240, 236, 232, 228, 224], fan=102,
                      rspeed=60, start_retract=0.4, vmax=60),
+    # Polymaker ASA: box 230-260C, bed 75-95C, fan off, "up to 200 mm/s". vmax 100, not 200:
+    # the max-flow bands start at vmax x 0.2 x 0.5 mm3/s, and 20 mm3/s would start past the hotend
+    "ASA":      dict(bed=95, temps=[260, 255, 250, 245, 240, 235, 230], fan=0,
+                     rspeed=40, start_retract=0.5, vmax=100),
 }
 P = PROFILES[MAT]
 VMAX = P["vmax"]
