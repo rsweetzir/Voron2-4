@@ -7,10 +7,10 @@
     ],
     "version": "2.4.0.2",
     "nozzle_temperature": [
-        "205"
+        "200"
     ],
     "nozzle_temperature_initial_layer": [
-        "210"
+        "205"
     ],
     "filament_flow_ratio": [
         "1"

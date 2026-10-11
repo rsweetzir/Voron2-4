@@ -5,6 +5,29 @@ Voron 2.4 300mm with a BTT SKR Pro v1.2 mainboard (USB), a BTT EBB toolhead boar
 and a BTT Eddy Duo probe (both on a 1 Mbit CAN bus via a candleLight USB-CAN adapter),
 running Klipper v0.13.
 
+## About this config
+
+This is the working configuration of my own Voron 2.4, and it represents a lot of
+evenings at the printer. Very little of it is stock: almost every value was measured,
+printed, broken and re-measured on this machine, and the commit history records why
+each one changed. Some of the work behind it:
+
+- moving the toolhead from USB to CAN, drawing the wiring, and then tracking down
+  intermittent "Timer too close" shutdowns to a missing terminator and, later, a CAN-L
+  pin pulled half out of its connector by a strain relief
+- fitting the Eddy Duo probe: tap homing, drift calibration across the probe's
+  temperature range, and comparing 9×9, 15×15 and 21×21 scans against each other
+  before settling on 21×21
+- a heat soak that remembers how long the bed has been warm, and recovers if a start
+  step fails, instead of a fixed wait
+- a one-plate filament calibration suite (`tools/calsuite.py`) that prints Orca's own
+  test models one after another, with Mainsail questions in between
+- chasing wood-filled PLA jams down to a hot nozzle idling during the heat soak
+
+If it saves you some of that time, good. Please read the notes in each file before
+copying values: they are tuned for this machine, and the reasons matter more than the
+numbers.
+
 ## Highlights
 
 - **Sensorless XY homing** via `[homing_override]`: homing current 0.8A, 2s stall
@@ -26,12 +49,60 @@ running Klipper v0.13.
     `RESUME` re-runs mesh, nozzle heat and purge before printing
   - optional chamber target once `[temperature_sensor chamber]` exists
   - `SMART_QGL` only levels when motors were off since the last QGL, then re-homes Z
-  - nozzle held at 150°C until right before the purge
+  - the nozzle is only warm (150°C) for the two tap Z homings and is **off during the
+    soak**; it reheats while the gantry levels and goes to print temperature right
+    before the purge. Holding it at 150°C through the soak heat-crept wood-filled PLA
+    into the heatbreak and jammed prints
   - console messages, e.g. `Running PETG heat soak: bed 80C for 10 min`
 - **START_HEAT_SOAK** manual soak macro (`TEMP=`, `MINUTES=`, `FILAMENT=`).
 - **Firmware retraction** (`[firmware_retraction]`), with per-filament
   `SET_RETRACTION` / `SET_PRESSURE_ADVANCE` in the slicer's filament start G-code.
 - Input shaper and accelerometer `axes_map` corrected for an EBB mounted at an angle.
+
+## Using the OrcaSlicer profiles
+
+The `orca/` folder holds OrcaSlicer 2.4 user presets: one printer, the processes, the
+filaments, and the base templates they inherit from.
+
+1. **Quit OrcaSlicer** (it only reads presets at start-up).
+2. **Copy the three folders**, *including their `base/` subfolders*, into Orca's user
+   preset folder:
+   - macOS: `~/Library/Application Support/OrcaSlicer/user/default/`
+   - Windows: `%APPDATA%\OrcaSlicer\user\default\`
+   - Linux: `~/.config/OrcaSlicer/user/default/` (snap:
+     `~/snap/orcaslicer/current/.config/OrcaSlicer/user/default/`)
+
+   ```
+   cp -R orca/machine orca/process orca/filament "<user preset folder>/"
+   ```
+   The processes and filaments inherit from the templates in `base/`; without them
+   they do not show up. (On a Mac, `tools/install-orca-presets.sh` does this, and
+   `tools/orca-preset-sync.plist` keeps it in sync when the repo changes.)
+3. **Start Orca** and pick:
+   - printer `Voron 2.4 300 0.4 FW Retraction` (needs Orca's stock Voron profiles,
+     which ship with Orca)
+   - a `Voron 0.20mm ...` process
+   - a `Voron ...` filament (`Voron PLA Wood Oak` only appears with the
+     `Voron 0.20mm PLA Wood` process, which has the slow first layer it needs)
+4. **Set your own print host** in the printer's settings (it is this printer's LAN IP).
+
+What the printer side must provide, or the presets will not print correctly:
+
+- a `PRINT_START` macro taking `EXTRUDER=`, `BED=` and `FILAMENT=` (see below), and
+  `PRINT_END`
+- `[firmware_retraction]`: the printer preset uses firmware retraction (`G10`/`G11`);
+  each filament's start G-code sets its own `SET_RETRACTION` and
+  `SET_PRESSURE_ADVANCE`, so retraction and pressure advance live in the filament,
+  not the printer
+
+Things that caught me out:
+
+- **Project files keep their own copy of the settings.** Opening an older `.3mf`
+  brings back the settings it was saved with, not your updated presets. After
+  updating the presets, re-select the printer, process and filament in the project,
+  discard the project's changes, and save it.
+- The temperatures, flow limits and retraction in the filament presets come from my
+  calibration prints of my spools (`filaments/` has the notes). Calibrate yours.
 
 ## Slicer start G-code (OrcaSlicer)
 
@@ -49,6 +120,7 @@ Do not add `M190`/`M109` before it; `PRINT_START` handles heating.
 | `firmware/` | Klipper `make menuconfig` settings for the SKR Pro (F407, 32KiB bootloader, USB) and EBB (G0B1, no bootloader): `ebb.config` USB, `ebb-can.config` CAN on PB0/PB1 at 1 Mbit/s (switch-over steps in `ebb-can.md`) |
 | `firmware/candlelight/` | candleLight build, flashing steps and `can0` network config for the USB-CAN adapter (STM32F072) |
 | `orca/` | OrcaSlicer 2.4 user presets (machine / filament / process). Processes and filaments inherit from the templates in `orca/*/base/`, which must be installed with them; the printer `Voron 2.4 300 0.4 FW Retraction` holds all its settings itself, with Orca's stock `Voron 2.4 300 0.4 nozzle` as its parent (Orca's GUI drops a printer with no parent) |
+| `filaments/` | Per-spool notes: the calibrated values, how each was found, and what went wrong on the way |
 | `docs/` | Calibration suite previews; `can_wiring.svg/.png` CAN wiring for the adapter, EBB and (later) Eddy Duo |
 | `tools/` | `sync-from-printer.sh` pulls the live Klipper and firmware files into this repo; `install-orca-presets.sh` copies `orca/` into a Mac's OrcaSlicer (one way, repo → Orca), run on every change by the `orca-preset-sync.plist` launch agent |
 
