@@ -20,3 +20,10 @@ Notes: wood fibres can clog small nozzles; use 0.4mm or larger and avoid long ho
 (heat creep chars the wood). Lower temperatures give a lighter colour, higher a darker one.
 
 OrcaSlicer preset: `Voron PLA Wood Oak` (inherits Generic PLA template).
+
+Jamming (2026-10-09/10): swollen filament tip, then the extruder ground a flat into it, early
+in prints. Cause: since 2026-10-07 PRINT_START held the nozzle at 150C for the ~10 min heat
+soak (parked at Z3 over the hot bed); wood-filled PLA heat-crept into the heatbreak. Fixed by
+keeping the nozzle off during the soak (warm only for the tap homings), plus 0.4mm/30mm/s
+retraction, fewer retractions, a 12 mm3/s cap, SpreadCycle on the extruder and drying the
+spool. Do not reintroduce a long hot idle before printing wood.
