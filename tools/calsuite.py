@@ -66,8 +66,11 @@ PROFILES = {
                      rspeed=60, start_retract=0.4, vmax=60),
     # Polymaker ASA: box 230-260C, bed 75-95C, fan off, "up to 200 mm/s". vmax 100, not 200:
     # the max-flow bands start at vmax x 0.2 x 0.5 mm3/s, and 20 mm3/s would start past the hotend
+    # tower_brim: brim (mm) around the temperature tower; ASA's tall, narrow tower lifts (default 5)
+    # bridge_speed (mm/s) slows the tower's bridges/overhangs; overhang_fan (%) is the only fan,
+    # on bridges and overhangs past 50% (general cooling stays at fan=0, as the box says)
     "ASA":      dict(bed=95, temps=[260, 255, 250, 245, 240, 235, 230], fan=0,
-                     rspeed=40, start_retract=0.5, vmax=100),
+                     rspeed=40, start_retract=0.5, vmax=100, tower_brim=15, bridge_speed=25, overhang_fan=40),
 }
 P = PROFILES[MAT]
 VMAX = P["vmax"]
@@ -271,17 +274,21 @@ def fmt(v):
 class Orca:
     """G-code sliced by orca_calib.py, centred on (cx, cy)."""
     def __init__(self, kind, cx, cy):
+        self.kind = kind
         path = os.path.join(ORCA_DIR, f"{kind}.gcode")
         self.lines = open(path).read().splitlines()
         self.header = dict(re.findall(r"(\w+)=([\d.]+)", self.lines[0]))
         if not self.lines[0].startswith(f"; orca calib {kind} "):
             sys.exit(f"{path} is not orca_calib.py {kind} output")
         xs, ys, zs, self.first = [], [], [], None
+        bx, by = [], []                                      # moves above the first layer (no brim)
         for l in self.lines:
             if l.startswith(("G0 ", "G1 ")):
                 d = dict(re.findall(r"([XYZ])(-?[\d.]+)", l.split(";")[0]))
                 if "X" in d: xs.append(float(d["X"]))
                 if "Y" in d: ys.append(float(d["Y"]))
+                if len(zs) > 1 and "E" in l and "X" in d and "Y" in d:
+                    bx.append(float(d["X"])); by.append(float(d["Y"]))
                 if self.first is None and "X" in d and "Y" in d:
                     self.first = (float(d["X"]), float(d["Y"]))
             elif l.startswith(";Z:"):
@@ -289,7 +296,12 @@ class Orca:
         self.dx, self.dy = cx - (min(xs) + max(xs)) / 2, cy - (min(ys) + max(ys)) / 2
         up = lambda v: math.ceil(v * 10) / 10                # round outward to 0.1mm
         dn = lambda v: math.floor(v * 10) / 10
-        self.foot = rect(dn(min(xs) + self.dx), dn(min(ys) + self.dy), up(max(xs) + self.dx), up(max(ys) + self.dy))
+        full = rect(dn(min(xs) + self.dx), dn(min(ys) + self.dy), up(max(xs) + self.dx), up(max(ys) + self.dy))
+        # A brim is one layer tall: the toolhead clearance applies to the body above it, the
+        # brim only needs the low-part gap. foot = body; brim = whole first layer (or None)
+        body = rect(dn(min(bx) + self.dx), dn(min(by) + self.dy), up(max(bx) + self.dx), up(max(by) + self.dy)) if bx else full
+        has_brim = "brim" in self.header and float(self.header["brim"]) > 0 and body != full
+        self.foot, self.brim = (body, full) if has_brim else (full, None)
         self.height = max(zs)
         self.start = (self.first[0] + self.dx, self.first[1] + self.dy)
 
@@ -306,7 +318,10 @@ class Orca:
                 continue
             if c.startswith("M106"):
                 s = int(float(re.search(r"S([\d.]+)", c).group(1)))
-                c = f"M106 S{min(s, P['fan'])}"
+                # only the tower is sliced with "fan on bridges/overhangs only", so only its fan
+                # may go above the profile's general fan (to overhang_fan)
+                cap = max(P['fan'], round(P.get('overhang_fan', 0) * 2.55)) if self.kind == "temp" else P['fan']
+                c = f"M106 S{min(s, cap)}"
             elif c.startswith("SET_VELOCITY_LIMIT"):
                 c = re.sub(r" ACCEL_TO_DECEL=\S+", "", c)    # Klipper 0.13 dropped max_accel_to_decel
             elif c.startswith(("G0 ", "G1 ")):
@@ -370,6 +385,10 @@ FLOW_OBJECTS = [(f"flow_{k + 1}", rect(cx - FLOW_W / 2, ROW["flow"] - FLOW_D / 2
 if FLOW_H + LH > LOW_H or FLOW_X[1] - FLOW_X[0] - FLOW_W < LOW_GAP:
     sys.exit("flow blocks printed one by one must stay under LOW_H and at least LOW_GAP apart")
 
+# First-layer brims (one layer tall) around tests that have one: low parts for clearance
+BRIMS = {n: b for n, b in (("temp_tower", TOWER.brim), ("max_flow", SPEED.brim),
+                           ("retraction", RETRACT.brim), ("tolerance", TOL.brim)) if b}
+
 def objects():
     """Exclude-objects in print order: one per PA triangle and per flow block."""
     for n, r, h in PLAN:
@@ -382,14 +401,21 @@ def check_clearance(plan):
     taller than the gantry clearance must be in front of every later test, because the
     gantry runs behind the nozzle."""
     problems = []
+    def rect_gap(a, b):                                       # gap between two rectangles (<0 = overlap)
+        return max(a[0][1] - b[2][1], b[0][1] - a[2][1], a[0][0] - b[2][0], b[0][0] - a[2][0])
     for j, (nj, rj, hj) in enumerate(plan):
-        x0, y0, x1, y1 = rj[0][0], rj[0][1], rj[2][0], rj[2][1]
-        if x0 < 0 or y0 < 0 or x1 > 300 or y1 > 300:
+        fj = BRIMS.get(nj) or rj                         # whole first layer, brim included
+        if fj[0][0] < 0 or fj[0][1] < 0 or fj[2][0] > 300 or fj[2][1] > 300:
             problems.append(f"{nj} is off the bed")
+        if fj[0][0] - WAIT_X < LOW_GAP:
+            problems.append(f"{nj}'s first layer is {fj[0][0] - WAIT_X:.1f}mm from the waiting lane, needs {LOW_GAP:.1f}mm")
+        x0, y0, x1, y1 = rj[0][0], rj[0][1], rj[2][0], rj[2][1]
         need = LOW_GAP if hj <= LOW_H else CLEAR_RADIUS / 2
         if x0 - WAIT_X < need:
             problems.append(f"{nj} is {x0 - WAIT_X:.1f}mm from the waiting lane, needs {need:.1f}mm")
         for ni, ri, hi in plan[:j]:
+            if ni in BRIMS and rect_gap(fj, BRIMS[ni]) < LOW_GAP:  # a finished brim is a low part
+                problems.append(f"{nj} is {rect_gap(fj, BRIMS[ni]):.1f}mm from {ni}'s brim, needs {LOW_GAP:.1f}mm")
             behind = y0 - ri[2][1]                       # this test's front edge - finished test's back edge
             sep = max(behind, ri[0][1] - y1, x0 - ri[2][0], ri[0][0] - x1)
             need = LOW_GAP if hi <= LOW_H else CLEAR_RADIUS / 2
@@ -410,6 +436,7 @@ def gap_behind(name, extra=6):
 header_start = len(out)
 g(f"; {NAME} calibration suite v5 ({MAT}, speed first from {VMAX}mm/s), generated by Claude: tools/calsuite.py")
 for name, r, h in objects():
+    r = BRIMS.get(name, r)                               # exclude the brim with its test
     poly = ",".join(f"[{x:.1f},{y:.1f}]" for x, y in r)
     cx = (r[0][0] + r[1][0]) / 2; cy = (r[0][1] + r[2][1]) / 2
     g(f"; {name}: {h:.1f}mm tall")
@@ -619,7 +646,9 @@ def check_moves(lines):
     """Simulate the toolhead: no move may leave the bed, and no move may pass through a
     finished test below its height (+1mm)."""
     foot = {n: (r[0][0], r[0][1], r[2][0], r[2][1], h) for n, r, h in objects()}
+    foot.update({f"{n}#brim": (b[0][0], b[0][1], b[2][0], b[2][1], FIRST_LH) for n, b in BRIMS.items()})
     done, current, x, y, z, problems = list(already), None, 150.0, 150.0, 10.0, []
+    done += [f"{n}#brim" for n in BRIMS if n in done]
     def hits(box, ax, ay, bx, by):                    # segment vs rectangle (Liang-Barsky)
         x0, y0, x1, y1 = box[:4]
         t0, t1, dx, dy = 0.0, 1.0, bx - ax, by - ay
@@ -635,7 +664,9 @@ def check_moves(lines):
         if l.startswith("EXCLUDE_OBJECT_START"):
             current = l.split("NAME=")[1]
         elif l.startswith("EXCLUDE_OBJECT_END"):
-            done.append(current); current = None
+            done.append(current)
+            if current in BRIMS: done.append(f"{current}#brim")
+            current = None
         elif l.startswith(("G0 ", "G1 ")):
             d = dict(re.findall(r"([XYZ])(-?[\d.]+)", l))
             nx, ny, nz = float(d.get("X", x)), float(d.get("Y", y)), float(d.get("Z", z))
@@ -653,4 +684,6 @@ check_moves(out)
 open(OUT, "w").write("\n".join(out) + "\n")
 print(f"{OUT}: {len(out)} lines, tallest item {state['safe_z']:.1f}mm")
 for name, r, h in PLAN:
-    print(f"  {name:13s} X {r[0][0]:5.1f}-{r[2][0]:5.1f}  Y {r[0][1]:5.1f}-{r[2][1]:5.1f}  {h:5.2f}mm")
+    b = BRIMS.get(name)
+    extra = f"  brim X {b[0][0]:.1f}-{b[2][0]:.1f} Y {b[0][1]:.1f}-{b[2][1]:.1f}" if b else ""
+    print(f"  {name:13s} X {r[0][0]:5.1f}-{r[2][0]:5.1f}  Y {r[0][1]:5.1f}-{r[2][1]:5.1f}  {h:5.2f}mm{extra}")

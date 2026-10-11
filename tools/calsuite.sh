@@ -28,11 +28,15 @@ if not prof:
     sys.exit(f"no profile {sys.argv[1]} in calsuite.py")
 temps = [int(t) for t in re.search(r"temps=\[([^\]]*)\]", prof.group(1)).group(1).split(",")]
 vmax = int(re.search(r"vmax=(\d+)", prof.group(1)).group(1))
-print(f"HIGH={temps[0]} LOW={temps[-1]} VMAX={vmax}")
+brim = re.search(r"tower_brim=(\d+)", prof.group(1))
+bs = re.search(r"bridge_speed=(\d+)", prof.group(1))
+of = re.search(r"overhang_fan=(\d+)", prof.group(1))
+print(f"HIGH={temps[0]} LOW={temps[-1]} VMAX={vmax} TOWER_BRIM={brim.group(1) if brim else 5} "
+      f"BRIDGE_SPEED={bs.group(1) if bs else ''} OVERHANG_FAN={of.group(1) if of else ''}")
 EOF
 )"
 SPEED_H=30.72                               # 12 bands x 2.56mm
-"$PY" orca_calib.py temp "$HIGH" "$LOW" "$VMAX" "$WORK/temp.gcode"
+CALSUITE_TOWER_BRIM=$TOWER_BRIM CALSUITE_BRIDGE_SPEED=$BRIDGE_SPEED CALSUITE_OVERHANG_FAN=$OVERHANG_FAN "$PY" orca_calib.py temp "$HIGH" "$LOW" "$VMAX" "$WORK/temp.gcode"
 "$PY" orca_calib.py speed "$SPEED_H" 0.6 "$WORK/speed.gcode"
 "$PY" orca_calib.py retract 11.4 "$VMAX" "$WORK/retract.gcode"
 "$PY" orca_calib.py tolerance "$VMAX" "$WORK/tolerance.gcode"

@@ -50,8 +50,21 @@ def speeds(v):
 if KIND == "temp":
     high, low, speed, out = int(ARGS[0]), int(ARGS[1]), int(ARGS[2]), ARGS[3]
     model, z0, z1 = "calib/temperature_tower/temperature_tower.drc", (500 - high) / 5 * 10, (500 - low) / 5 * 10 + 10
-    proc, fil = dict(speeds(speed), brim_type="outer_only", brim_width="5"), {}
-    header = f"high={high} low={low} speed={speed}"
+    brim = os.environ.get("CALSUITE_TOWER_BRIM", "5")     # mm; calsuite.sh sets it per material (ASA 15)
+    proc, fil = dict(speeds(speed), brim_type="outer_only", brim_width=brim), {}
+    # Optional per material (calsuite.sh, from the profile): slower bridges/overhangs, and a fan
+    # only on bridges and steep overhangs (general cooling off), e.g. ASA
+    bs = os.environ.get("CALSUITE_BRIDGE_SPEED")
+    if bs:
+        b = int(bs)
+        proc.update(bridge_speed=str(b), internal_bridge_speed=str(b), enable_overhang_speed="1",
+                    overhang_2_4_speed=str(b), overhang_3_4_speed=str(max(b * 3 // 5, 5)),
+                    overhang_4_4_speed=str(max(b * 2 // 5, 5)))
+    of = os.environ.get("CALSUITE_OVERHANG_FAN")
+    if of:
+        fil.update(fan_min_speed=["0"], fan_max_speed=["0"], overhang_fan_speed=[of],
+                   enable_overhang_bridge_fan=["1"], overhang_fan_threshold=["50%"])
+    header = f"high={high} low={low} speed={speed} brim={brim}"
 elif KIND == "speed":
     height, scale, out = float(ARGS[0]), float(ARGS[1]), ARGS[2]
     lh, lw = round(NOZZLE * 0.8, 2), round(NOZZLE * 1.75, 2)          # as Orca's Max flowrate test
