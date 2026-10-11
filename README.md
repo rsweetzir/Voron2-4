@@ -49,10 +49,12 @@ numbers.
     `RESUME` re-runs mesh, nozzle heat and purge before printing
   - optional chamber target once `[temperature_sensor chamber]` exists
   - `SMART_QGL` only levels when motors were off since the last QGL, then re-homes Z
-  - the nozzle stays **cold until the soak is over**: the first homing sets Z with the
-    Eddy contactless (good enough to park for the soak), it reheats to 150°C while the
-    gantry levels, and the only nozzle tap is the final `G28 Z` right before the mesh;
-    then print temperature and purge. Holding it at 150°C through the soak heat-crept
+  - the nozzle stays **cold through the soak**: the first homing sets Z with the Eddy
+    contactless (good enough to park for the soak); if the gantry needs leveling, the
+    QGL (also contactless) runs **during the soak, after its first minute at
+    temperature**, and the soak clock counts the leveling time; the nozzle starts
+    warming ~90 s before the soak ends, and the only nozzle tap is the final `G28 Z`
+    right before the mesh; then print temperature and purge. Holding it at 150°C through the soak heat-crept
     wood-filled PLA into the heatbreak and jammed prints
   - console messages, e.g. `Running PETG heat soak: bed 80C for 10 min`
 - **START_HEAT_SOAK** manual soak macro (`TEMP=`, `MINUTES=`, `FILAMENT=`).
