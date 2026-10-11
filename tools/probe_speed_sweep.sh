@@ -1,4 +1,5 @@
 #!/bin/sh
+# SPDX-License-Identifier: MIT  (c) 2026 The Voron2-4 authors, see LICENSE
 # Probe repeatability vs probing speed. Waits until no print is running, then at a clear
 # spot (nozzle X60 Y60, probe 25mm behind) runs PROBE_ACCURACY with 10 samples at rising
 # speeds, starting at 25% of the configured 5mm/s. Stops at the first speed that can no

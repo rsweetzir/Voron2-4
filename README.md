@@ -49,10 +49,11 @@ numbers.
     `RESUME` re-runs mesh, nozzle heat and purge before printing
   - optional chamber target once `[temperature_sensor chamber]` exists
   - `SMART_QGL` only levels when motors were off since the last QGL, then re-homes Z
-  - the nozzle is only warm (150°C) for the two tap Z homings and is **off during the
-    soak**; it reheats while the gantry levels and goes to print temperature right
-    before the purge. Holding it at 150°C through the soak heat-crept wood-filled PLA
-    into the heatbreak and jammed prints
+  - the nozzle stays **cold until the soak is over**: the first homing sets Z with the
+    Eddy contactless (good enough to park for the soak), it reheats to 150°C while the
+    gantry levels, and the only nozzle tap is the final `G28 Z` right before the mesh;
+    then print temperature and purge. Holding it at 150°C through the soak heat-crept
+    wood-filled PLA into the heatbreak and jammed prints
   - console messages, e.g. `Running PETG heat soak: bed 80C for 10 min`
 - **START_HEAT_SOAK** manual soak macro (`TEMP=`, `MINUTES=`, `FILAMENT=`).
 - **Firmware retraction** (`[firmware_retraction]`), with per-filament
@@ -135,3 +136,59 @@ Do not add `M190`/`M109` before it; `PRINT_START` handles heating.
 - CAN bus termination: 120R at the USB-CAN adapter and on the EBB (jumper fitted),
   Eddy 120R off. Without the EBB terminator the bus logged errors and the EBB shut
   down with "Timer too close".
+
+## Credits and references
+
+None of this was built in a vacuum. The documentation, projects and people below
+are what this configuration leans on; thank you to all of them.
+
+**Firmware and host software**
+- [Klipper](https://www.klipper3d.org/) by Kevin O'Connor and contributors, in particular:
+  [Eddy current probe](https://www.klipper3d.org/Eddy_Probe.html) (calibration, tap
+  homing, thermal drift calibration),
+  [TMC drivers / sensorless homing](https://www.klipper3d.org/TMC_Drivers.html),
+  [CAN bus](https://www.klipper3d.org/CANBUS.html) and
+  [CAN bus troubleshooting](https://www.klipper3d.org/CANBUS_Troubleshooting.html),
+  [Bed mesh](https://www.klipper3d.org/Bed_Mesh.html) and the
+  [Config reference](https://www.klipper3d.org/Config_Reference.html)
+- [Moonraker](https://github.com/Arksine/moonraker) by Arksine and
+  [Mainsail](https://docs.mainsail.xyz/) (its `mainsail.cfg` client macros, prompts and
+  `user_resume_macro` hook)
+- [KAMP: Klipper Adaptive Meshing & Purging](https://github.com/kyleisah/Klipper-Adaptive-Meshing-Purging)
+  by Kyleisah (the Voron purge)
+- [candleLight firmware](https://github.com/candle-usb/candleLight_fw) for the USB-CAN adapter
+
+**Hardware**
+- [Voron Design](https://docs.vorondesign.com/): the Voron 2.4 build guide, sample
+  configuration, Clockwork 2 and Stealthburner
+- BIGTREETECH documentation for the [EBB toolhead boards](https://github.com/bigtreetech/EBB)
+  and the [Eddy probe](https://github.com/bigtreetech/Eddy)
+
+**Slicer and calibration models**
+- [OrcaSlicer](https://github.com/OrcaSlicer/OrcaSlicer) by SoftFever and contributors
+  (AGPL-3.0), and its [calibration guide](https://github.com/OrcaSlicer/OrcaSlicer/wiki/calibration_guide).
+  `tools/orca_calib.py` slices Orca's own calibration models straight from your Orca
+  installation; they are not copied into this repository. As credited in Orca's guide:
+  - temperature tower: remixed from the "Smart compact temperature calibration tower"
+    by gaaZolee
+  - max volumetric speed test: remixed from CNC Kitchen's (Stefan Hermann) Extrusion
+    Test Structure
+  - flow and retraction tests: inspired by SuperSlicer (by supermerill)
+  - tolerance test (`OrcaToleranceTest`): ships with OrcaSlicer
+- [CNC Kitchen](https://cnckitchen.com/) for the extrusion-limit testing approach
+
+**This repository**
+- Built and tuned by the repository owner on this machine. Claude (Anthropic) helped with
+  much of the diagnosis, scripting and documentation from October 2026; the commits
+  co-authored by it say so.
+
+## License
+
+The original work here (scripts in `tools/`, macros and notes written for this
+printer, the OrcaSlicer presets and the documentation) is released under the
+[MIT License](LICENSE): use it, change it, share it, no strings attached beyond
+keeping the notice. Files that started from someone else's work keep that work's
+license: the Voron and BIGTREETECH sample configurations behind `printer.cfg` and
+`ebb_extruder.cfg`, KAMP's `KAMP_Settings.cfg`, the candleLight firmware build, and
+OrcaSlicer's calibration models (not included; read from your own Orca install). See
+[LICENSE](LICENSE) for the details.

@@ -1,4 +1,5 @@
 #!/bin/sh
+# SPDX-License-Identifier: MIT  (c) 2026 The Voron2-4 authors, see LICENSE
 # Build the filament calibration suite: slice the OrcaSlicer models (orca_calib.py), then
 # write the one-plate G-code (calsuite.py) and upload it to the printer (not started).
 #   tools/calsuite.sh MATERIAL NAME [FROM=pa TEMP=210 MAX_FLOW=14 ...]
@@ -12,7 +13,7 @@
 set -e
 MAT=$1 NAME=$2
 shift 2 2>/dev/null || true
-[ -n "$MAT" ] && [ -n "$NAME" ] || { sed -n '2,8p' "$0"; exit 1; }
+[ -n "$MAT" ] && [ -n "$NAME" ] || { sed -n '3,10p' "$0"; exit 1; }
 PY=${CALSUITE_PYTHON:-$HOME/.venvs/calsuite/bin/python}
 cd "$(dirname "$0")"
 WORK=$(mktemp -d)

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: MIT  (c) 2026 The Voron2-4 authors, see LICENSE
 """
 CAN bus monitor for the printer Pi: logs every CAN error with what the printer was doing.
 

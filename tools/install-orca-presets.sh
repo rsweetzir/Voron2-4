@@ -1,4 +1,5 @@
 #!/bin/sh
+# SPDX-License-Identifier: MIT  (c) 2026 The Voron2-4 authors, see LICENSE
 # Copy the OrcaSlicer user presets in orca/ into this Mac's OrcaSlicer (one way:
 # repo -> Mac). Presets that exist only on the Mac are left alone; edits made in
 # Orca to a repo preset are overwritten the next time that preset changes here.

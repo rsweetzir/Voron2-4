@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: MIT  (c) 2026 The Voron2-4 authors, see LICENSE
 # Flow-rate test: five 25x25x3mm solid squares printed one after another, each at a
 # different extrusion multiplier (M221). Pick the square whose top surface is smooth
 # and fully closed without ridges: gaps/grooves = too little flow, rough/raised = too much.

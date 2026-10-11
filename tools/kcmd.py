@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: MIT  (c) 2026 The Voron2-4 authors, see LICENSE
 # Run G-code on the printer through Klipper's API socket and stream the console output
 # until the command finishes. No web proxy, so long commands (homing, QGL, soaks) don't
 # time out. Run it on the printer Pi, e.g. from this Pi:

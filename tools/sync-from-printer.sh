@@ -1,4 +1,5 @@
 #!/bin/sh
+# SPDX-License-Identifier: MIT  (c) 2026 The Voron2-4 authors, see LICENSE
 # Pull the current Klipper config and firmware build settings from the printer
 # (ssh alias 'voron', see ~/.ssh/config; override with PRINTER_SSH=...) into this repo.
 # OrcaSlicer presets are not pulled: orca/ is their source, and

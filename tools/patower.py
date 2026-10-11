@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: MIT  (c) 2026 The Voron2-4 authors, see LICENSE
 # Pressure advance tower (Klipper method): a 40x40mm two-wall square printed fast
 # (100 mm/s) at low accel (500) and square_corner_velocity 1, so corner bulges are
 # easy to see. Pressure advance steps up every 4mm; pick the band with the sharpest corners.

@@ -1,4 +1,5 @@
 #!/bin/sh
+# SPDX-License-Identifier: MIT  (c) 2026 The Voron2-4 authors, see LICENSE
 # Restart Klipper without losing the bed state:
 #   - refuses while a print is printing or paused
 #   - notes when the motors are on: a restart releases them and loses homing/QGL (OK after a

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: MIT  (c) 2026 The Voron2-4 authors, see LICENSE
 # First-layer test: nine 30x30mm single-layer squares spread over the bed (corners, edge
 # midpoints, centre). Squares are printed through the normal PRINT_START, so the adaptive
 # mesh covers the whole bed. Compare the squares: all alike = mesh matches the bed;
