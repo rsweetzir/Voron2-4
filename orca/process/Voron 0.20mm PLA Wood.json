@@ -26,5 +26,7 @@
     "bottom_surface_pattern": "zig-zag",
     "top_surface_pattern": "zig-zag",
     "infill_combination": "1",
-    "slow_down_layers": "3"
+    "slow_down_layers": "3",
+    "exclude_object": "1",
+    "gcode_label_objects": "1"
 }

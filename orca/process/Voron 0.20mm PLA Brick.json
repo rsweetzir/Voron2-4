@@ -23,5 +23,7 @@
     "fuzzy_skin_ripples_per_layer": "16",
     "fuzzy_skin_layers_between_ripple_offset": "10",
     "fuzzy_skin_ripple_offset": "50%",
-    "outer_wall_speed": "40"
+    "outer_wall_speed": "40",
+    "exclude_object": "1",
+    "gcode_label_objects": "1"
 }

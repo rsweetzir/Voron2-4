@@ -23,5 +23,7 @@
     "fuzzy_skin_scale": "4",
     "fuzzy_skin_octaves": "4",
     "fuzzy_skin_persistence": "0.5",
-    "outer_wall_speed": "40"
+    "outer_wall_speed": "40",
+    "exclude_object": "1",
+    "gcode_label_objects": "1"
 }

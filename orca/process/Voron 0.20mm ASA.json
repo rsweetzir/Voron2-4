@@ -26,5 +26,7 @@
     "reduce_crossing_wall": "1",
     "max_travel_detour_distance": "0",
     "reduce_infill_retraction": "0",
-    "brim_object_gap": "0.125"
+    "brim_object_gap": "0.125",
+    "exclude_object": "1",
+    "gcode_label_objects": "1"
 }
