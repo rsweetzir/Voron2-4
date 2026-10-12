@@ -1,0 +1,73 @@
+{
+    "from": "User",
+    "inherits": "Generic ASA template @Voron Voron 2.4 300 0.4 nozzle",
+    "name": "Voron ASA Polymaker Red",
+    "filament_settings_id": [
+        "Voron ASA Polymaker Red"
+    ],
+    "version": "2.4.0.2",
+    "nozzle_temperature": [
+        "240"
+    ],
+    "nozzle_temperature_initial_layer": [
+        "245"
+    ],
+    "cool_plate_temp": [
+        "105"
+    ],
+    "eng_plate_temp": [
+        "105"
+    ],
+    "hot_plate_temp": [
+        "105"
+    ],
+    "textured_plate_temp": [
+        "105"
+    ],
+    "cool_plate_temp_initial_layer": [
+        "105"
+    ],
+    "eng_plate_temp_initial_layer": [
+        "105"
+    ],
+    "hot_plate_temp_initial_layer": [
+        "105"
+    ],
+    "textured_plate_temp_initial_layer": [
+        "105"
+    ],
+    "fan_min_speed": [
+        "0"
+    ],
+    "fan_max_speed": [
+        "0"
+    ],
+    "enable_overhang_bridge_fan": [
+        "1"
+    ],
+    "overhang_fan_speed": [
+        "40"
+    ],
+    "overhang_fan_threshold": [
+        "50%"
+    ],
+    "close_fan_the_first_x_layers": [
+        "3"
+    ],
+    "filament_max_volumetric_speed": [
+        "12"
+    ],
+    "filament_flow_ratio": [
+        "1"
+    ],
+    "enable_pressure_advance": [
+        "0"
+    ],
+    "filament_start_gcode": [
+        "; Voron ASA Polymaker Red: Klipper owns PA and retraction (PA/retraction/flow/max flow are\n; placeholders until the calibration suite finishes)\nSET_PRESSURE_ADVANCE ADVANCE=0.04\nSET_RETRACTION RETRACT_LENGTH=0.5 RETRACT_SPEED=40 UNRETRACT_SPEED=30"
+    ],
+    "compatible_prints": [
+        "Voron 0.20mm ASA"
+    ],
+    "compatible_prints_condition": ""
+}
