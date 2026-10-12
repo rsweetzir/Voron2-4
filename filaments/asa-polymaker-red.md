@@ -10,6 +10,7 @@ printer as `cal_polymaker_asa_red_*`.
 | Bed temperature | 105°C | At the box's 95°C the tower's brim cooled and curled; flat at 105°C |
 | Part fan | Off; 40% on bridges and overhangs past 50%; off for the first 3 layers | Box says off; bridges and overhangs printed cleanly with the overhang fan |
 | Brim | Auto, 15mm (process) | Small, tall ASA parts lift without it |
+| Travel | Avoid crossing walls; retract + 0.4mm lift on every travel and layer change | So the nozzle does not clip edges that start to lift on full plates |
 | Bridges / overhangs | 25 mm/s; overhangs 25/15/10 mm/s by steepness | Tower bridges clean at these speeds |
 | Max volumetric speed | 16 mm³/s | Max-flow test, last good band |
 | Pressure advance | 0.05 | PA triangles |
