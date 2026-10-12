@@ -15,7 +15,8 @@ printer as `cal_polymaker_asa_red_*`.
 | Max volumetric speed | 16 mm³/s | Max-flow test, last good band |
 | Pressure advance | 0.05 | PA triangles |
 | Flow ratio | 100% | Flow blocks |
-| Retraction (firmware) | 1.0mm @ 40mm/s | Retraction tower |
+| Retraction (firmware) | 1.0mm @ 40mm/s, unretract 25mm/s | Retraction tower; unretract slowed from 30 so restarts after travel don't push a bulge |
+| Wall speeds | Outer 100mm/s @ 2000mm/s², inner 150mm/s (process) | Bulges on layers with holes at the PLA speeds (outer 200, inner 300); PA was calibrated at 100mm/s |
 | Tolerance | 0.4mm | Tolerance test: tightest hole the key fits |
 
 ASA notes: print enclosed (doors and lid closed); a longer heat soak helps (at a 100°C+

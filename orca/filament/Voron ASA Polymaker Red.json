@@ -64,7 +64,7 @@
         "0"
     ],
     "filament_start_gcode": [
-        "; Voron ASA Polymaker Red (calibration suite v5, 2026-10-11): Klipper owns PA and retraction\nSET_PRESSURE_ADVANCE ADVANCE=0.05\nSET_RETRACTION RETRACT_LENGTH=1.0 RETRACT_SPEED=40 UNRETRACT_SPEED=30"
+        "; Voron ASA Polymaker Red (calibration suite v5, 2026-10-11): Klipper owns PA and retraction\nSET_PRESSURE_ADVANCE ADVANCE=0.05\nSET_RETRACTION RETRACT_LENGTH=1.0 RETRACT_SPEED=40 UNRETRACT_SPEED=25"
     ],
     "compatible_prints": [
         "Voron 0.20mm ASA"
