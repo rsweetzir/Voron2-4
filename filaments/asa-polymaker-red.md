@@ -1,9 +1,8 @@
 # Polymaker ASA (Red), 1.75mm
 
 Box: print 230–260°C, bed 75–95°C, up to 200 mm/s, fan off. Dried 4 h before use.
-Calibration in progress (calibration suite v5, profile `ASA`); values marked *pending*
-are placeholders until the suite finishes. Answers are saved on the printer as
-`cal_polymaker_asa_red_*`.
+Calibrated with calibration suite v5 (profile `ASA`), 2026-10-11; answers are saved on the
+printer as `cal_polymaker_asa_red_*`.
 
 | Setting | Value | How it was found |
 |---|---|---|
@@ -12,10 +11,11 @@ are placeholders until the suite finishes. Answers are saved on the printer as
 | Part fan | Off; 40% on bridges and overhangs past 50%; off for the first 3 layers | Box says off; bridges and overhangs printed cleanly with the overhang fan |
 | Brim | Auto, 15mm (process) | Small, tall ASA parts lift without it |
 | Bridges / overhangs | 25 mm/s; overhangs 25/15/10 mm/s by steepness | Tower bridges clean at these speeds |
-| Max volumetric speed | 12 mm³/s *(pending)* | Max-flow test |
-| Pressure advance | 0.04 *(pending)* | PA triangles |
-| Flow ratio | 100% *(pending)* | Flow blocks |
-| Retraction (firmware) | 0.5mm @ 40mm/s *(pending)* | Retraction tower |
+| Max volumetric speed | 16 mm³/s | Max-flow test, last good band |
+| Pressure advance | 0.05 | PA triangles |
+| Flow ratio | 100% | Flow blocks |
+| Retraction (firmware) | 1.0mm @ 40mm/s | Retraction tower |
+| Tolerance | 0.4mm | Tolerance test: tightest hole the key fits |
 
 ASA notes: print enclosed (doors and lid closed); a longer heat soak helps (at a 100°C+
 bed PRINT_START soaks 20 min).

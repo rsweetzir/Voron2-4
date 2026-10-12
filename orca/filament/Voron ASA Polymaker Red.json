@@ -55,7 +55,7 @@
         "3"
     ],
     "filament_max_volumetric_speed": [
-        "12"
+        "16"
     ],
     "filament_flow_ratio": [
         "1"
@@ -64,7 +64,7 @@
         "0"
     ],
     "filament_start_gcode": [
-        "; Voron ASA Polymaker Red: Klipper owns PA and retraction (PA/retraction/flow/max flow are\n; placeholders until the calibration suite finishes)\nSET_PRESSURE_ADVANCE ADVANCE=0.04\nSET_RETRACTION RETRACT_LENGTH=0.5 RETRACT_SPEED=40 UNRETRACT_SPEED=30"
+        "; Voron ASA Polymaker Red (calibration suite v5, 2026-10-11): Klipper owns PA and retraction\nSET_PRESSURE_ADVANCE ADVANCE=0.05\nSET_RETRACTION RETRACT_LENGTH=1.0 RETRACT_SPEED=40 UNRETRACT_SPEED=30"
     ],
     "compatible_prints": [
         "Voron 0.20mm ASA"
