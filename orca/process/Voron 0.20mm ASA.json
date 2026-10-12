@@ -21,9 +21,10 @@
     "overhang_2_4_speed": "25",
     "overhang_3_4_speed": "15",
     "overhang_4_4_speed": "10",
-    "brim_type": "auto_brim",
-    "brim_width": "15",
+    "brim_type": "outer_only",
+    "brim_width": "8",
     "reduce_crossing_wall": "1",
     "max_travel_detour_distance": "0",
-    "reduce_infill_retraction": "0"
+    "reduce_infill_retraction": "0",
+    "brim_object_gap": "0.125"
 }
