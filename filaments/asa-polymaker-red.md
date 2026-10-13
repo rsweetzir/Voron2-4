@@ -6,7 +6,7 @@ printer as `cal_polymaker_asa_red_*`.
 
 | Setting | Value | How it was found |
 |---|---|---|
-| Nozzle temperature | 240°C (245°C first layer) | Temp tower 260→230°C: 240/245 cleanest overhangs and holes; 250+ droops, 230–235 fuzzy overhang tips |
+| Nozzle temperature | 250°C, first layer too (was 240/245) | Temp tower 260→230°C: 240/245 looked cleanest, but thin parts printed at 240°C snapped along the layers; 250°C for layer strength (its slight overhang droop is helped by the overhang fan) |
 | Bed temperature | 105°C | At the box's 95°C the tower's brim cooled and curled; flat at 105°C |
 | Part fan | Off; 40% on bridges and overhangs past 50%; off for the first 3 layers | Box says off; bridges and overhangs printed cleanly with the overhang fan |
 | Brim | 8mm on every part, 0.125mm gap to the part (process) | Full plates lift without it; the gap lets the brim snap off without the whitened line ASA leaves when a fused brim is torn off. Small tall parts can get a wider brim per object in Orca |
