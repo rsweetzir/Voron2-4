@@ -31,7 +31,7 @@
     "gcode_label_objects": "1",
     "alternate_extra_wall": "1",
     "ensure_vertical_shell_thickness": "ensure_moderate",
-    "initial_layer_line_width": "0.8",
+    "initial_layer_line_width": "0.5",
     "internal_solid_infill_line_width": "0.8",
     "top_shell_layers": "3",
     "wall_loops": "2",

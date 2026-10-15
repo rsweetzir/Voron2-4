@@ -10,7 +10,7 @@ profile, 230→200°C); answers saved on the printer in variables.cfg (`cal_pla_
 | Retraction (firmware) | 0.4mm @ 30/25mm/s (was 0.7 @ 40) | Stringing pyramids gave 0.7; cut 2026-10-10 after jams from frequent retractions |
 | Pressure advance | 0.05 | PA triangles 0.00→0.08 |
 | Flow ratio | 1.00 | Flow blocks 92→108% |
-| Max volumetric speed | 14 mm³/s (12 during the jam hunt; 20 on the speed test) | Raised again 2026-10-14 once the real jam cause (hot nozzle idling in the soak) was fixed; step to 16 if it stays clean |
+| Max volumetric speed | 12 mm³/s (14 jammed) | 2026-10-14: a 0.8mm-wide first layer held ~11.5-14 mm³/s for 12 min at 200°C and jammed (too cold to melt that fast, pressure built up). First layer is 0.5mm wide again; keep 12 |
 
 Note: the v4 speed wall's front labels were separate lines with a retract/hop per pixel run,
 which disturbed flow; 20 mm³/s may be conservative. The labels are now part of the wall
