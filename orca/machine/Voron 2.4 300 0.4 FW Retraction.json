@@ -73,7 +73,7 @@
     "input_shaping_freq_x": "0",
     "input_shaping_freq_y": "0",
     "input_shaping_type": "Default",
-    "layer_change_gcode": ";AFTER_LAYER_CHANGE\n;[layer_z]",
+    "layer_change_gcode": ";AFTER_LAYER_CHANGE\n;[layer_z]\n_WOOD_GRAIN_LAYER Z=[layer_z]",
     "long_retractions_when_cut": [
         "0"
     ],
