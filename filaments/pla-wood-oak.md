@@ -30,3 +30,7 @@ retraction, fewer retractions, a 12 mm3/s cap, SpreadCycle on the extruder and d
 spool. Do not reintroduce a long hot idle before printing wood. Later (2026-10-14) long runs
 still jammed at 200°C from melt rate; 220°C helped, but 0.8mm-wide lines at 14 mm3/s still
 jammed (2026-10-17), so the cap is 10 mm3/s with 0.45mm internal solid infill.
+Thin parts (2026-10-17): a 1.6 mm board at 0.1 mm layers jammed the same way (swollen tip)
+right after the first layer: ~6 mm3/s average and a retraction every 6.6 mm of filament.
+Low flow plus frequent retraction lets heat creep up; for such parts use the Grain preset
+(no retraction, Z hop only) and keep the nozzle at 205-220°C.

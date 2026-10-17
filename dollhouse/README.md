@@ -88,14 +88,26 @@ after.
 - **Colour bands by temperature:** wood PLA darkens as it gets hotter, so varying the
   nozzle temperature gives grain-like bands along the board. It shows on walls, which is
   exactly the visible face here. Select the **`Voron PLA Wood Oak Grain`** filament
-  preset: it is the wood preset plus `WOOD_GRAIN MIN=205 MAX=230 BAND=0.8 START=0.6`,
+  preset: it is the wood preset plus `WOOD_GRAIN MIN=205 MAX=220 BAND=0.8 START=0.6`,
   which sets a random nozzle temperature in that range for every 0.8 mm of height, from
   0.6 mm up (`klipper/macros.cfg`; Orca's layer-change G-code calls `_WOOD_GRAIN_LAYER`
   with the layer height). Band height is in mm, so it looks the same at 0.1 or 0.2 mm
-  layers. Keep it within about 205-230°C; below that, long runs jammed (see the filament
-  notes).
+  layers.
+- **Continuous walls, no retraction:** the Grain preset turns retraction off (Orca length
+  0 and `SET_RETRACTION RETRACT_LENGTH=0`, so Orca's `G10`/`G11` do nothing) and keeps the
+  Z hop. A thin board fed slowly heat-creeps: the first 0.1 mm attempt (2026-10-17) jammed
+  with a swollen filament tip after the first layer, at ~6 mm³/s average and ~23
+  retractions a minute (6.6 mm of filament between retractions; the shiplap panel that
+  printed fine had 19 mm). The 205-220°C band range also keeps the nozzle cooler at low flow.
 - **Fine layers:** `Voron 0.10mm PLA Wood` is the wood process at 0.1 mm layers (first
-  layer 0.3 mm), for finer detail on the visible face. [`models/ShiplapVertical.stl`](models/ShiplapVertical.stl) (a 1x
-  shiplap board, 1.59 × 12 × 301 mm, laid diagonally to fit the bed, with triangular end fins
-  that hold it upright; print it as it is, standing on edge) slices to about 22 min and 8 g
-  at 0.1 mm with a 5 mm outer brim.
+  layer 0.3 mm) with: Arachne walls (min feature 10%, min bead 50%), so the visible outer
+  wall is one continuous loop around the board and fins; the seam as a step at a corner
+  (no scarf seam); and slow corners (wall jerk 2, sent to Klipper as
+  `SQUARE_CORNER_VELOCITY=2`).
+- [`models/ShiplapVertical.stl`](models/ShiplapVertical.stl): a 1x shiplap board, 1.59 ×
+  11.64 × 301 mm with 0.79 mm laps top and bottom, laid diagonally to fit the bed, with
+  breakaway triangular fins at both ends (0.4 mm from the board, joined by a ~1.2 mm neck)
+  that hold it upright. The fin tips above the board's top lap were trimmed off. Print it
+  as it is, standing on edge, with a 5 mm outer brim: ~20 min and 8 g at 0.1 mm. The fins'
+  inner walls are separate loops, so each layer still has two travels along the board
+  (Z hop over the top edge); the outer face is continuous.

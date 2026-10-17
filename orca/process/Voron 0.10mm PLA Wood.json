@@ -13,7 +13,7 @@
     "seam_position": "aligned",
     "seam_gap": "10%",
     "wipe_on_loops": "0",
-    "seam_slope_type": "external",
+    "seam_slope_type": "none",
     "wall_sequence": "inner wall/outer wall",
     "initial_layer_speed": "15",
     "initial_layer_infill_speed": "52",
@@ -38,5 +38,11 @@
     "sparse_infill_density": "10%",
     "initial_layer_print_height": "0.3",
     "first_layer_flow_ratio": "1.05",
-    "layer_height": "0.1"
+    "layer_height": "0.1",
+    "outer_wall_jerk": "2",
+    "inner_wall_jerk": "2",
+    "wall_generator": "arachne",
+    "min_feature_size": "10%",
+    "min_bead_width": "50%",
+    "default_jerk": "2"
 }
