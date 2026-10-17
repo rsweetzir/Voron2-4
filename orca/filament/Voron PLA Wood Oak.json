@@ -7,16 +7,16 @@
     ],
     "version": "2.4.0.2",
     "nozzle_temperature": [
-        "200"
+        "220"
     ],
     "nozzle_temperature_initial_layer": [
-        "200"
+        "220"
     ],
     "filament_flow_ratio": [
         "1"
     ],
     "filament_max_volumetric_speed": [
-        "12"
+        "14"
     ],
     "enable_pressure_advance": [
         "0"

@@ -35,5 +35,7 @@
     "internal_solid_infill_line_width": "0.8",
     "top_shell_layers": "3",
     "wall_loops": "2",
-    "sparse_infill_density": "10%"
+    "sparse_infill_density": "10%",
+    "initial_layer_print_height": "0.3",
+    "first_layer_flow_ratio": "1.05"
 }
