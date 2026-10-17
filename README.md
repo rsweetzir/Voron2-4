@@ -16,8 +16,8 @@ each one changed. Some of the work behind it:
   intermittent "Timer too close" shutdowns to a missing terminator and, later, a CAN-L
   pin pulled half out of its connector by a strain relief
 - fitting the Eddy Duo probe: tap homing, drift calibration across the probe's
-  temperature range, and comparing 9×9, 15×15 and 21×21 scans against each other
-  before settling on 21×21
+  temperature range, and comparing 9×9, 15×15 and 21×21 scans against each other,
+  then moving to 31×31, which made the biggest difference to large first layers
 - a heat soak that remembers how long the bed has been warm, and recovers if a start
   step fails, instead of a fixed wait
 - a one-plate filament calibration suite (`tools/calsuite.py`) that prints Orca's own
@@ -126,6 +126,26 @@ Do not add `M190`/`M109` before it; `PRINT_START` handles heating.
 | `filaments/` | Per-spool notes: the calibrated values, how each was found, and what went wrong on the way |
 | `docs/` | Calibration suite previews; `can_wiring.svg/.png` CAN wiring for the adapter, EBB and (later) Eddy Duo |
 | `tools/` | `sync-from-printer.sh` pulls the live Klipper and firmware files into this repo; `install-orca-presets.sh` copies `orca/` into a Mac's OrcaSlicer (one way, repo → Orca), run on every change by the `orca-preset-sync.plist` launch agent |
+| `dollhouse/` | 1:12 scale dollhouse: dimensional lumber sizes, wood-grain boards from Blender, printing thin boards on edge |
+
+## Dollhouse (1:12 scale)
+
+A current project on this printer is a 1:12 scale dollhouse; its notes are in
+[`dollhouse/`](dollhouse/README.md). At 1:12 one real foot is one scale inch
+(1 real inch = 2.117 mm). Dimensional lumber, by its actual (planed) size and its
+nominal size:
+
+| Nominal | Actual real-world | 1:12 (actual) | 1:12 (nominal) |
+|---|---|---|---|
+| 2" (1x2, 2x2) | 1.5 in (38 mm) | 3.18 mm | 4.23 mm |
+| 3" (1x3, 2x3) | 2.5 in (64 mm) | 5.29 mm | 6.35 mm |
+| 4" (1x4, 2x4) | 3.5 in (89 mm) | 7.41 mm | 8.47 mm |
+| 6" (1x6, 2x6) | 5.5 in (140 mm) | 11.64 mm | 12.70 mm |
+| 8" (1x8, 2x8) | 7.25 in (184 mm) | 15.35 mm | 16.93 mm |
+| 10" (1x10, 2x10) | 9.25 in (235 mm) | 19.58 mm | 21.17 mm |
+| 12" (1x12, 2x12) | 11.25 in (286 mm) | 23.81 mm | 25.40 mm |
+| thickness 1x | 0.75 in (19 mm) | 1.59 mm | 2.12 mm |
+| thickness 2x | 1.5 in (38 mm) | 3.18 mm | 4.23 mm |
 
 ## Using this config
 
@@ -178,6 +198,11 @@ are what this configuration leans on; thank you to all of them.
   - flow and retraction tests: inspired by SuperSlicer (by supermerill)
   - tolerance test (`OrcaToleranceTest`): ships with OrcaSlicer
 - [CNC Kitchen](https://cnckitchen.com/) for the extrusion-limit testing approach
+
+**Dollhouse**
+- [Blender](https://www.blender.org/) (Displace and Solidify modifiers, procedural Wood texture)
+- Free CC0 wood textures with displacement maps: [ambientCG](https://ambientcg.com/) and
+  [Poly Haven](https://polyhaven.com/textures)
 
 **This repository**
 - Built and tuned by the repository owner on this machine. Claude (Anthropic) helped with
