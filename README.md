@@ -126,7 +126,7 @@ Do not add `M190`/`M109` before it; `PRINT_START` handles heating.
 | `filaments/` | Per-spool notes: the calibrated values, how each was found, and what went wrong on the way |
 | `docs/` | Calibration suite previews; `can_wiring.svg/.png` CAN wiring for the adapter, EBB and (later) Eddy Duo |
 | `tools/` | `sync-from-printer.sh` pulls the live Klipper and firmware files into this repo; `install-orca-presets.sh` copies `orca/` into a Mac's OrcaSlicer (one way, repo → Orca), run on every change by the `orca-preset-sync.plist` launch agent |
-| `dollhouse/` | 1:12 scale dollhouse: dimensional lumber sizes, wood-grain boards from Blender, printing thin boards on edge |
+| `dollhouse/` | 1:12 scale dollhouse: dimensional lumber sizes, wood-grain boards from Blender, printing thin boards on edge; `models/` holds the printable parts (STL) |
 
 ## Dollhouse (1:12 scale)
 

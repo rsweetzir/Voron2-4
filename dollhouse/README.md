@@ -95,6 +95,7 @@ after.
   layers. Keep it within about 205-230°C; below that, long runs jammed (see the filament
   notes).
 - **Fine layers:** `Voron 0.10mm PLA Wood` is the wood process at 0.1 mm layers (first
-  layer 0.3 mm), for finer detail on the visible face. `ShiplapVertical` (a 1.59 × 12 ×
-  301 mm board laid diagonally, with triangular end fins) slices to about 22 min and 8 g
+  layer 0.3 mm), for finer detail on the visible face. [`models/ShiplapVertical.stl`](models/ShiplapVertical.stl) (a 1x
+  shiplap board, 1.59 × 12 × 301 mm, laid diagonally to fit the bed, with triangular end fins
+  that hold it upright; print it as it is, standing on edge) slices to about 22 min and 8 g
   at 0.1 mm with a 5 mm outer brim.
