@@ -78,6 +78,14 @@ after.
 
 ## Printing the boards on edge
 
+> **Outcome (2026-10-17): not worth it for this spool.** The board printed (34.5 min, no
+> jams once the hotend was cleared), but temperature bands of 205-220°C made too little
+> colour difference to read as grain, and the no-retraction travels left stringing along
+> the top edge. Large flat panels are the plan instead. The notes, presets and macro below
+> are kept for reference; don't use the `Grain` filament preset for normal prints (it has
+> retraction off).
+
+
 - Stand the board on its long edge (wide face vertical) and add an **outer brim**
   (3-5 mm). At 1.6 × 11.6 mm a board is about 7× taller than it is thick.
 - Wood PLA presets: `Voron PLA Wood Oak` + `Voron 0.20mm PLA Wood` (see
