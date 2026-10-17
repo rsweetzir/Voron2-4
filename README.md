@@ -200,7 +200,7 @@ are what this configuration leans on; thank you to all of them.
 - [CNC Kitchen](https://cnckitchen.com/) for the extrusion-limit testing approach
 
 **Dollhouse**
-- [Blender](https://www.blender.org/) (Displace and Solidify modifiers, procedural Wood texture)
+- [Blender](https://www.blender.org/) (Displace modifier, procedural Wood texture)
 - Free CC0 wood textures with displacement maps: [ambientCG](https://ambientcg.com/) and
   [Poly Haven](https://polyhaven.com/textures)
 
