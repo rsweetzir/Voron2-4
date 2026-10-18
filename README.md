@@ -57,6 +57,13 @@ numbers.
     right before the mesh; then print temperature and purge. Holding it at 150°C through the soak heat-crept
     wood-filled PLA into the heatbreak and jammed prints
   - console messages, e.g. `Running PETG heat soak: bed 80C for 10 min`
+- **Filament parking**: `PRINT_END`, cancel and a still-hot `PRINT_START` pull the filament
+  tip 50 mm up (`FILAMENT_PARK`: above the heatbreak, below the drive gears), so it can't
+  heat-creep through the next soak, tap homing and mesh; the next purge feeds it back at
+  the purge line (KAMP `tip_distance` + the parked length). The state survives restarts
+  (`filament_parked` in `variables.cfg`); run `FILAMENT_LOADED` after loading by hand.
+  Short retracts (10 mm) jammed: the soft tip hardened inside the heatbreak.
+- **COLD_PULL** nozzle cleaning (heat, push, cool to `PULL_TEMP`, pull with `FORCE_MOVE`).
 - **START_HEAT_SOAK** manual soak macro (`TEMP=`, `MINUTES=`, `FILAMENT=`).
 - **Firmware retraction** (`[firmware_retraction]`), with per-filament
   `SET_RETRACTION` / `SET_PRESSURE_ADVANCE` in the slicer's filament start G-code.

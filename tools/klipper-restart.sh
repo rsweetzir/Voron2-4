@@ -27,7 +27,7 @@ print("%d %s" % (round(s["heater_bed"]["target"]), ",".join(str(int(x)) for x in
 bed=${saved%% *}; hist=${saved#* }; [ "$hist" = "$saved" ] && hist=""
 echo "saved: bed target ${bed}C, $(echo "$hist" | tr ',' '\n' | grep -c . ) min of bed history"
 
-curl -s -m 10 -X POST "$H/printer/$EP" >/dev/null
+curl -s -m 10 -X POST "$H/printer/$EP" >/dev/null || true   # the reply can time out while Klipper restarts; the wait below checks
 for i in $(seq 1 30); do
     sleep 2
     s=$(curl -s -m 5 "$H/printer/info" | python3 -c 'import sys,json;print(json.load(sys.stdin)["result"]["state"])' 2>/dev/null || true)
