@@ -34,3 +34,10 @@ Thin parts (2026-10-17): a 1.6 mm board at 0.1 mm layers jammed the same way (sw
 right after the first layer: ~6 mm3/s average and a retraction every 6.6 mm of filament.
 Low flow plus frequent retraction lets heat creep up; for such parts use the Grain preset
 (no retraction, Z hop only) and keep the nozzle at 205-220°C.
+
+Feed friction (2026-10-18): first layers starving part-way through (solid lines, then thin
+and stringy) and extruder clicks were friction in the PTFE tube from the drybox, not heat
+creep: feeding filament out of the box by hand made the same print work. Wood PLA's rough
+surface drags more than plain PLA. Keep the drybox-to-extruder path short with gentle bends,
+use 3-4 mm ID tube for it, square-cut tube ends with no steps at joints, and a spool that
+turns freely. Check the feed path first when wood PLA starts under-extruding mid-print.
