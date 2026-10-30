@@ -1,0 +1,42 @@
+{
+    "from": "User",
+    "inherits": "Generic PLA template @Voron Voron 2.4 300 0.4 nozzle",
+    "name": "Voron PLA Matte Wood Brown",
+    "filament_settings_id": [
+        "Voron PLA Matte Wood Brown"
+    ],
+    "version": "2.4.0.2",
+    "filament_vendor": [
+        "Panchroma"
+    ],
+    "nozzle_temperature": [
+        "210"
+    ],
+    "nozzle_temperature_initial_layer": [
+        "215"
+    ],
+    "hot_plate_temp": [
+        "60"
+    ],
+    "hot_plate_temp_initial_layer": [
+        "60"
+    ],
+    "textured_plate_temp": [
+        "60"
+    ],
+    "textured_plate_temp_initial_layer": [
+        "60"
+    ],
+    "filament_flow_ratio": [
+        "0.98"
+    ],
+    "filament_max_volumetric_speed": [
+        "12"
+    ],
+    "enable_pressure_advance": [
+        "0"
+    ],
+    "filament_start_gcode": [
+        "; Voron PLA Matte Wood Brown (Panchroma PLA Matte, CA04077): Klipper owns PA and retraction\nSET_PRESSURE_ADVANCE ADVANCE=0.04\nSET_RETRACTION RETRACT_LENGTH=0.8 RETRACT_SPEED=40 UNRETRACT_SPEED=30"
+    ]
+}

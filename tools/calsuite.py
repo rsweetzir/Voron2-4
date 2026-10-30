@@ -62,6 +62,10 @@ PROFILES = {
                      rspeed=40, start_retract=0.6, vmax=80),
     "PLA_WOOD": dict(bed=60, temps=[230, 225, 220, 215, 210, 205, 200], fan=255,
                      rspeed=40, start_retract=0.6, vmax=60),
+    # Panchroma PLA Matte: roughly 190-230C; matte PLA tends to top out around 12-16 mm3/s,
+    # so vmax 60 starts the max-flow bands at 6 mm3/s
+    "PLA_MATTE": dict(bed=60, temps=[230, 225, 220, 215, 210, 205, 200, 195], fan=255,
+                     rspeed=40, start_retract=0.6, vmax=60),
     "PETG":     dict(bed=80, temps=[248, 244, 240, 236, 232, 228, 224], fan=102,
                      rspeed=60, start_retract=0.4, vmax=60),
     # Polymaker ASA: box 230-260C, bed 75-95C (105C here: at 95C the tower's brim curled), fan off, "up to 200 mm/s". vmax 100, not 200:
