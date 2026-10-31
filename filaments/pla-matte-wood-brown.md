@@ -3,17 +3,18 @@
 Matte PLA in a wood colour, not wood-filled: no wood-fibre clog or heat-creep handling
 needed. Panchroma Matte runs roughly 190–230°C.
 
-Status: **not calibrated yet**. Starting values below; replace them with the calibration
-suite's answers (saved on the printer in variables.cfg as `cal_pla_matte_*`).
+Status: **partly calibrated** (v5 plate, 2026-10-30): temperature, pressure advance and max
+volumetric speed read; flow and retraction still to read. Answers are saved on the printer in
+variables.cfg as `cal_pla_matte_woodbrown_*`.
 
 | Setting | Value | How it was found |
 |---|---|---|
-| Nozzle temperature | 210°C (215°C first layer) | Starting value |
+| Nozzle temperature | 210°C (215°C first layer) | Temp tower 230→195°C picked 210 |
 | Bed temperature | 60°C | |
 | Retraction (firmware) | 0.8mm @ 40mm/s | Starting value (from Marble) |
-| Pressure advance | 0.04 | Starting value |
+| Pressure advance | 0.05 | PA triangles 0.00→0.08 |
 | Flow ratio | 0.98 | Starting value |
-| Max volumetric speed | 12 mm³/s (placeholder) | Matte PLA usually tops out around 12–16 mm³/s |
+| Max volumetric speed | 12 mm³/s at 210°C | Speed wall 6→28: 12 was the fastest band with no drop-out. variables.cfg got 14 during the print (`cal_pla_matte_woodbrown_max_flow`); set it to 12 |
 
 Calibration plate: `PLA_Matte_WoodBrown_calibration_suite_v5.gcode`, built with
 `OUT_DIR=~/Downloads tools/calsuite.sh PLA_MATTE PLA_Matte_WoodBrown` (profile `PLA_MATTE`:
