@@ -15,6 +15,7 @@ variables.cfg as `cal_pla_matte_woodbrown_*`.
 | Pressure advance | 0.05 | PA triangles 0.00→0.08 |
 | Flow ratio | 1.04 | Flow blocks 92→108% picked 104%. Read before the extruder check; if that finds the extruder under-feeding, fix rotation_distance and drop this back toward 1.00 |
 | Max volumetric speed | 14 mm³/s at 210°C | Speed wall 6→28 (2 mm³/s bands, 2.56mm tall): picked 14 (Z 10.56–13.12) at the prompt and kept it, as saved in variables.cfg (`cal_pla_matte_woodbrown_max_flow`). The wall roughened around 12mm high, inside that band, so drop to 12 if long solid fills under-extrude |
+| Tolerance | 0.05mm clearance | Tolerance key: the tightest hole the key fits is 0.05mm. Parts print close to size, so no XY hole/contour compensation needed |
 
 Calibration plate: `PLA_Matte_WoodBrown_calibration_suite_v5.gcode`, built with
 `OUT_DIR=~/Downloads tools/calsuite.sh PLA_MATTE PLA_Matte_WoodBrown` (profile `PLA_MATTE`:
