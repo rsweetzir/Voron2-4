@@ -37,5 +37,5 @@ default `max_extrude_only_distance` is 50mm, so the 100mm goes in two moves.
 6. Listen for clicks while it runs; the 2026-10-18 clicks matched motor turns (22.7mm of
    filament per turn).
 
-OrcaSlicer preset: `Voron PLA Matte Wood Brown` (inherits Generic PLA template), drafted in
-`orca/drafts/` because Orca was open; move it to `orca/filament/` to sync it into Orca.
+OrcaSlicer preset: `Voron PLA Matte Wood Brown` (inherits Generic PLA template), in
+`orca/filament/` (synced into Orca by the preset sync agent; restart Orca to load it).
