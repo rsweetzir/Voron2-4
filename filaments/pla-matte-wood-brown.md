@@ -14,7 +14,7 @@ variables.cfg as `cal_pla_matte_woodbrown_*`.
 | Retraction (firmware) | 0.8mm @ 40mm/s | Starting value (from Marble) |
 | Pressure advance | 0.05 | PA triangles 0.00→0.08 |
 | Flow ratio | 1.04 | Flow blocks 92→108% picked 104%. Read before the extruder check; if that finds the extruder under-feeding, fix rotation_distance and drop this back toward 1.00 |
-| Max volumetric speed | 12 mm³/s at 210°C | Speed wall 6→28 (2 mm³/s bands, 2.56mm tall): the wall dropped out at about 12mm high, part way up the 14 mm³/s band (Z 10.56–13.12), so 14 fails and 12 (Z 8.0–10.56) is the last clean band. 12 leaves ~1–2 mm³/s margin under the real limit. variables.cfg got 14 (`cal_pla_matte_woodbrown_max_flow`); set it to 12 |
+| Max volumetric speed | 14 mm³/s at 210°C | Speed wall 6→28 (2 mm³/s bands, 2.56mm tall): picked 14 (Z 10.56–13.12) at the prompt and kept it, as saved in variables.cfg (`cal_pla_matte_woodbrown_max_flow`). The wall roughened around 12mm high, inside that band, so drop to 12 if long solid fills under-extrude |
 
 Calibration plate: `PLA_Matte_WoodBrown_calibration_suite_v5.gcode`, built with
 `OUT_DIR=~/Downloads tools/calsuite.sh PLA_MATTE PLA_Matte_WoodBrown` (profile `PLA_MATTE`:
