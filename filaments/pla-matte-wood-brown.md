@@ -17,6 +17,10 @@ variables.cfg as `cal_pla_matte_woodbrown_*`.
 | Max volumetric speed | 14 mm³/s at 210°C | Speed wall 6→28 (2 mm³/s bands, 2.56mm tall): picked 14 (Z 10.56–13.12) at the prompt and kept it, as saved in variables.cfg (`cal_pla_matte_woodbrown_max_flow`). The wall roughened around 12mm high, inside that band, so drop to 12 if long solid fills under-extrude |
 | Tolerance | 0.05mm clearance | Tolerance key: the tightest hole the key fits is 0.05mm. Parts print close to size, so no XY hole/contour compensation needed |
 
+Fine flow test (2026-10-31): `PLA_Matte_WoodBrown_flow_100-104.gcode` from `tools/flowfine.py`, eight
+15mm squares at 100.0-104.0% flow in the extrusion amounts (no M221), numbered by dots on the front
+edge (front row 1-4, back row 5-8); the end-of-print pop-up saves `cal_pla_matte_woodbrown_flow`.
+
 Calibration plate: `PLA_Matte_WoodBrown_calibration_suite_v5.gcode`, built with
 `OUT_DIR=~/Downloads tools/calsuite.sh PLA_MATTE PLA_Matte_WoodBrown` (profile `PLA_MATTE`:
 temperature tower 230→195°C in 5°C steps, speed wall 6→28 mm³/s, PA 0.00→0.08, flow
