@@ -37,6 +37,6 @@
         "0"
     ],
     "filament_start_gcode": [
-        "; Voron PLA Matte Wood Brown (Panchroma PLA Matte, CA04077): Klipper owns PA and retraction\nSET_PRESSURE_ADVANCE ADVANCE=0.04\nSET_RETRACTION RETRACT_LENGTH=0.8 RETRACT_SPEED=40 UNRETRACT_SPEED=30"
+        "; Voron PLA Matte Wood Brown (Panchroma PLA Matte, CA04077): Klipper owns PA and retraction\nSET_PRESSURE_ADVANCE ADVANCE=0.05\nSET_RETRACTION RETRACT_LENGTH=0.2 RETRACT_SPEED=40 UNRETRACT_SPEED=30"
     ]
 }

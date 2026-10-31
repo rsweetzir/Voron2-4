@@ -3,15 +3,15 @@
 Matte PLA in a wood colour, not wood-filled: no wood-fibre clog or heat-creep handling
 needed. Panchroma Matte runs roughly 190–230°C.
 
-Status: **partly calibrated** (v5 plate, 2026-10-30): temperature, pressure advance, max
-volumetric speed and flow read; retraction still to read. Answers are saved on the printer in
+Status: **calibrated** (v5 plate, 2026-10-30), pending the extruder check below (flow 104%
+was read before it). Answers are saved on the printer in
 variables.cfg as `cal_pla_matte_woodbrown_*`.
 
 | Setting | Value | How it was found |
 |---|---|---|
 | Nozzle temperature | 210°C (215°C first layer) | Temp tower 230→195°C picked 210 |
 | Bed temperature | 60°C | |
-| Retraction (firmware) | 0.8mm @ 40mm/s | Starting value (from Marble) |
+| Retraction (firmware) | 0.2mm @ 40mm/s (unretract 30mm/s) | Retraction tower 0.2→1.2mm: picked 0.2, the lowest band, so the real minimum may be lower. Raise it if stringing shows on real prints |
 | Pressure advance | 0.05 | PA triangles 0.00→0.08 |
 | Flow ratio | 1.04 | Flow blocks 92→108% picked 104%. Read before the extruder check; if that finds the extruder under-feeding, fix rotation_distance and drop this back toward 1.00 |
 | Max volumetric speed | 14 mm³/s at 210°C | Speed wall 6→28 (2 mm³/s bands, 2.56mm tall): picked 14 (Z 10.56–13.12) at the prompt and kept it, as saved in variables.cfg (`cal_pla_matte_woodbrown_max_flow`). The wall roughened around 12mm high, inside that band, so drop to 12 if long solid fills under-extrude |
