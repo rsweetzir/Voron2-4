@@ -6,6 +6,7 @@
 #     e.g. tools/calsuite.sh PLA_PLUS Duramic_PLA_Plus
 #     FROM= resumes at a later test with the earlier answers (see calsuite.py)
 #     OUT_DIR=dir tools/calsuite.sh ...  writes the G-code to dir instead of uploading it
+#     PRINTER=vegas tools/calsuite.sh ...  the Las Vegas Voron (350mm bed, 0.6mm nozzle)
 # MATERIAL is a calsuite.py PROFILES key. Needs OrcaSlicer (macOS app or Linux snap, see
 # orca_calib.py) and a Python with DracoPy, manifold3d and numpy ($CALSUITE_PYTHON, default
 # ~/.venvs/calsuite; set it up with
@@ -15,6 +16,12 @@ MAT=$1 NAME=$2
 shift 2 2>/dev/null || true
 [ -n "$MAT" ] && [ -n "$NAME" ] || { sed -n '3,10p' "$0"; exit 1; }
 PY=${CALSUITE_PYTHON:-$HOME/.venvs/calsuite/bin/python}
+case "${PRINTER:-edmonton}" in
+    edmonton) ;;
+    vegas) PRINTER_HOST=${PRINTER_HOST:-192.168.128.20}
+           export CALSUITE_BED=350 CALSUITE_NOZZLE=0.6 ;;
+    *) echo "unknown PRINTER=$PRINTER (edmonton or vegas)"; exit 1 ;;
+esac
 cd "$(dirname "$0")"
 WORK=$(mktemp -d)
 trap 'rm -rf "$WORK"' EXIT
@@ -35,7 +42,8 @@ print(f"HIGH={temps[0]} LOW={temps[-1]} VMAX={vmax} TOWER_BRIM={brim.group(1) if
       f"BRIDGE_SPEED={bs.group(1) if bs else ''} OVERHANG_FAN={of.group(1) if of else ''}")
 EOF
 )"
-SPEED_H=30.72                               # 12 bands x 2.56mm
+# 12 bands of 8 vase layers (0.8 x nozzle; 5 layers for bigger nozzles), as calsuite.py
+SPEED_H=$(python3 -c "n=float('${CALSUITE_NOZZLE:-0.4}'); print(round(12*round(n*0.8,2)*(8 if n<=0.4 else 5),2))")
 CALSUITE_TOWER_BRIM=$TOWER_BRIM CALSUITE_BRIDGE_SPEED=$BRIDGE_SPEED CALSUITE_OVERHANG_FAN=$OVERHANG_FAN "$PY" orca_calib.py temp "$HIGH" "$LOW" "$VMAX" "$WORK/temp.gcode"
 "$PY" orca_calib.py speed "$SPEED_H" 0.6 "$WORK/speed.gcode"
 "$PY" orca_calib.py retract 11.4 "$VMAX" "$WORK/retract.gcode"

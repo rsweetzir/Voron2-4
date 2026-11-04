@@ -73,6 +73,10 @@ PROFILES = {
     # tower_brim: brim (mm) around the temperature tower; ASA's tall, narrow tower lifts (default 5)
     # bridge_speed (mm/s) slows the tower's bridges/overhangs; overhang_fan (%) is the only fan,
     # on bridges and overhangs past 50% (general cooling stays at fan=0, as the box says)
+    # Overture ASA (Vegas): box 240-270C, bed 70-95C (100C here, as Polymaker's brim curled at 95C),
+    # 30-50 mm/s, fan off
+    "ASA_OVERTURE": dict(bed=100, temps=[270, 265, 260, 255, 250, 245, 240], fan=0,
+                     rspeed=40, start_retract=0.5, vmax=50, tower_brim=15, bridge_speed=25, overhang_fan=40),
     "ASA":      dict(bed=105, temps=[260, 255, 250, 245, 240, 235, 230], fan=0,
                      rspeed=40, start_retract=0.5, vmax=100, tower_brim=15, bridge_speed=25, overhang_fan=40),
 }
@@ -83,14 +87,23 @@ FLOWS = [92, 96, 100, 104, 108]
 RETRACTS = [round(0.2 + 0.1 * k, 1) for k in range(11)]  # 0.2 .. 1.2, one per 1mm of tower
 TOLERANCES = [0, 0.05, 0.1, 0.2, 0.3, 0.4]               # OrcaToleranceTest hole clearances
 
-LH, FIRST_LH, W = 0.2, 0.25, 0.45
+# Printer (calsuite.sh PRINTER=...): bed size and nozzle. The plate below is laid out for 300mm
+# and moved to the centre of a bigger bed; other nozzles get 1.125 x nozzle lines
+BED = float(os.environ.get("CALSUITE_BED", "300"))
+NOZZLE = float(os.environ.get("CALSUITE_NOZZLE", "0.4"))
+OFF = (BED - 300) / 2
+LH, FIRST_LH = 0.2, 0.25
+W = 0.45 if NOZZLE == 0.4 else round(NOZZLE * 1.125, 3)
 BASE_H = 0.45                                            # PA triangle solid bottom: 2 layers
 FIL_A = math.pi * (1.75 / 2) ** 2
 TRAVEL_F, FIRST_F = 200 * 60, 25 * 60
 TEST_F = VMAX * 60                                       # walls and fill of every test
-V0 = round(VMAX * LH * 0.5)                              # label top speed as mm3/s (0.2 x 0.5 line)
-SPEED_VOLS = list(range(V0, V0 + 24, 2))                 # 12 bands, e.g. 8 .. 30 mm3/s
-SPEED_BAND = 2.56                                        # 8 vase layers of 0.32mm per band
+V0 = round(VMAX * LH * (0.5 if NOZZLE == 0.4 else W))   # label top speed as mm3/s (0.2 x 0.5 line)
+SPEED_STEP = 2 if NOZZLE <= 0.4 else 3                    # bigger nozzles flow more: wider steps
+SPEED_VOLS = list(range(V0, V0 + 12 * SPEED_STEP, SPEED_STEP))   # 12 bands, e.g. 8 .. 30 mm3/s
+SPEED_LH = round(NOZZLE * 0.8, 2)                        # Orca's vase layer (0.32mm for 0.4)
+SPEED_LAYERS = 8 if NOZZLE <= 0.4 else 5                 # 12 bands stay under the gantry clearance
+SPEED_BAND = round(SPEED_LH * SPEED_LAYERS, 2)           # 8 vase layers of 0.32mm per band
 RETRACT_BASE, RETRACT_BAND = 0.4, 1.0                    # Orca: base 0.4mm, one step per 1mm
 
 # ---- Stealthburner clearance for tests printed one after another (OrcaSlicer standard values)
@@ -343,15 +356,15 @@ class Orca:
 # ================================================================ plate plan
 TRI_SIDE = 22.0
 TRI_H = TRI_SIDE * math.sqrt(3) / 2
-PA_X = [35 + i * 30 for i in range(len(PA_VALUES))]     # 35 .. 275
+PA_X = [OFF + 35 + i * 30 for i in range(len(PA_VALUES))]     # 35 .. 275
 PA_TOP = BASE_H + 0.8                                   # 2 solid layers + 4 wall layers
-FLOW_X, FLOW_W, FLOW_D, FLOW_H = [70.0, 110.0, 150.0, 190.0, 230.0], 25.0, 12.5, 1.65   # 8 solid layers
+FLOW_X, FLOW_W, FLOW_D, FLOW_H = [OFF + x for x in (70.0, 110.0, 150.0, 190.0, 230.0)], 25.0, 12.5, 1.65   # 8 solid layers
 
-ROW = dict(temp=25, speed=101, pa=176, flow=207, last=254)   # Y centre of each row, front to back
-TOWER = Orca("temp", 150, ROW["temp"])
-SPEED = Orca("speed", 150, ROW["speed"])
-RETRACT = Orca("retract", 80, ROW["last"])
-TOL = Orca("tolerance", 165, ROW["last"])
+ROW = {k: OFF + y for k, y in dict(temp=25, speed=101, pa=176, flow=207, last=254).items()}   # Y centre of each row, front to back
+TOWER = Orca("temp", OFF + 150, ROW["temp"])
+SPEED = Orca("speed", OFF + 150, ROW["speed"])
+RETRACT = Orca("retract", OFF + 80, ROW["last"])
+TOL = Orca("tolerance", OFF + 165, ROW["last"])
 
 TOWER_TEMPS = list(range(int(TOWER.header["high"]), int(TOWER.header["low"]) - 1, -5))
 if TOWER_TEMPS != P["temps"]:
@@ -409,7 +422,7 @@ def check_clearance(plan):
         return max(a[0][1] - b[2][1], b[0][1] - a[2][1], a[0][0] - b[2][0], b[0][0] - a[2][0])
     for j, (nj, rj, hj) in enumerate(plan):
         fj = BRIMS.get(nj) or rj                         # whole first layer, brim included
-        if fj[0][0] < 0 or fj[0][1] < 0 or fj[2][0] > 300 or fj[2][1] > 300:
+        if fj[0][0] < 0 or fj[0][1] < 0 or fj[2][0] > BED or fj[2][1] > BED:
             problems.append(f"{nj} is off the bed")
         if fj[0][0] - WAIT_X < LOW_GAP:
             problems.append(f"{nj}'s first layer is {fj[0][0] - WAIT_X:.1f}mm from the waiting lane, needs {LOW_GAP:.1f}mm")
@@ -483,7 +496,7 @@ g("EXCLUDE_OBJECT_START NAME=max_flow")
 route(*SPEED.start, gap)
 cur = [None]
 def speed_layer(z):
-    if z <= SPEED_BAND / 8 + 1e-6:                       # first layer: as sliced (25mm/s)
+    if z <= SPEED_LH + 1e-6:                             # first layer: as sliced (25mm/s)
         return
     b = min(int((z - 1e-6) // SPEED_BAND), len(SPEED_VOLS) - 1)
     if b != cur[0]:
@@ -503,7 +516,7 @@ gap = gap_behind("max_flow")
 wait_spot(gap)
 bands = [f"{v} ({b * SPEED_BAND:.1f}-{(b + 1) * SPEED_BAND:.1f}mm)" for b, v in enumerate(SPEED_VOLS)]
 ask("max_flow", f"{NAME} 2/6: max volumetric speed",
-    f"Orca speed test (60% size), single wall: every {SPEED_BAND}mm band (8 layers) is 2 mm3/s faster, from {V0} mm3/s ({VMAX}mm/s at 0.2mm layers) at the bed. Measure from the bed up to where the wall first gets rough, thin or gappy and pick the LAST band below it.",
+    f"Orca speed test (60% size), single wall: every {SPEED_BAND}mm band ({SPEED_LAYERS} layers) is {SPEED_STEP} mm3/s faster, from {V0} mm3/s ({VMAX}mm/s at 0.2mm layers) at the bed. Measure from the bed up to where the wall first gets rough, thin or gappy and pick the LAST band below it.",
     SPEED_VOLS, bands)
 
 # ================================================================ 3. PA triangles: each on its own, filled bottoms, no base
@@ -674,7 +687,7 @@ def check_moves(lines):
         elif l.startswith(("G0 ", "G1 ")):
             d = dict(re.findall(r"([XYZ])(-?[\d.]+)", l))
             nx, ny, nz = float(d.get("X", x)), float(d.get("Y", y)), float(d.get("Z", z))
-            if not (0 <= nx <= 300 and 0 <= ny <= 300):
+            if not (0 <= nx <= BED and 0 <= ny <= BED):
                 problems.append(f"line {n + 1}: off the bed ({nx:.1f},{ny:.1f})")
             lift = (nx, ny) == (x, y) and nz >= z               # straight up off a finished test
             for name in done:

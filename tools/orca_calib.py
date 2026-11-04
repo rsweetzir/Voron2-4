@@ -40,7 +40,9 @@ MACHINE = "Voron 2.4 300 0.4 FW Retraction"   # standalone user printer (no pare
 # "process not compatible" without one), so the flattened printer is hung off Orca's stock
 # Voron preset; every setting still comes from the repo printer.
 MACHINE_PARENT = "Voron 2.4 300 0.4 nozzle"
-NOZZLE = 0.4
+# Another printer (calsuite.sh PRINTER=vegas): the same presets with its nozzle and bed size
+NOZZLE = float(os.environ.get("CALSUITE_NOZZLE", "0.4"))
+BED = float(os.environ.get("CALSUITE_BED", "300"))
 
 def speeds(v):
     v = str(v)
@@ -123,12 +125,21 @@ def resolve(name):
 
 machine = resolve(MACHINE)
 machine.update(type="machine", inherits=MACHINE_PARENT, machine_start_gcode="", machine_end_gcode="")
+if NOZZLE != 0.4 or BED != 300:
+    b = f"{BED:g}"
+    machine.update(nozzle_diameter=[f"{NOZZLE:g}"], printable_area=["0x0", f"{b}x0", f"{b}x{b}", f"0x{b}"],
+                   max_layer_height=[f"{NOZZLE * 0.8:g}"])
 process = resolve("Voron 0.20mm PLA")
 process.update(type="process", name="calsuite " + KIND, print_settings_id="calsuite " + KIND,
                layer_height="0.2", initial_layer_print_height="0.25", skirt_loops="0",
                exclude_object="0", enable_arc_fitting="0",
                default_acceleration="3000", inner_wall_acceleration="3000", outer_wall_acceleration="3000",
                travel_acceleration="3000", top_surface_acceleration="2000", initial_layer_acceleration="500")
+if NOZZLE != 0.4:                              # the repo's process presets are 0.4mm lines
+    lw = f"{NOZZLE * 1.125:.2f}"
+    process.update({k: lw for k in ("line_width", "outer_wall_line_width", "inner_wall_line_width",
+                    "sparse_infill_line_width", "internal_solid_infill_line_width", "top_surface_line_width",
+                    "support_line_width")}, initial_layer_line_width=f"{NOZZLE * 1.25:.2f}")
 process.update(proc)
 filament = resolve("Generic PLA template @Voron Voron 2.4 300 0.4 nozzle")
 filament.update(type="filament", name="calsuite " + KIND, filament_settings_id=["calsuite " + KIND],
