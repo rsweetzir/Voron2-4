@@ -47,6 +47,11 @@ ORCA_DIR = sys.argv[4]
 EXTRA = dict(a.split("=", 1) for a in sys.argv[5:])
 SECTIONS = ["temp", "speed", "pa", "flow", "retract", "tolerance"]   # print order
 FROM = EXTRA.pop("FROM", "temp").lower()
+# Second (fine) temperature tower: it needs its own row behind the first, which a 300mm bed has
+# no room for. FINE=1 / FINE=0 force it on / off; by default it is on for beds of 340mm and up
+FINE_ON = {"1": True, "0": False}.get(EXTRA.pop("FINE", ""), float(os.environ.get("CALSUITE_BED", "300")) >= 340)
+if not FINE_ON:
+    print("calsuite: one temperature tower (no room for the fine tower on this bed; FINE=1 forces it)")
 if FROM not in SECTIONS:
     sys.exit(f"FROM must be one of {SECTIONS}")
 ANSWERS = {k.lower(): v for k, v in EXTRA.items()}
@@ -75,6 +80,11 @@ PROFILES = {
     # on bridges and overhangs past 50% (general cooling stays at fan=0, as the box says)
     # Overture ASA (Vegas): box 240-270C, bed 70-95C (100C here, as Polymaker's brim curled at 95C),
     # 30-50 mm/s, fan off
+    # Elastic TPU (unbranded, orange): box 170-220C, 20-40 mm/s. Slow: vmax 30. TPU flows little,
+    # so the max-flow bands start at 2 mm3/s in 1 mm3/s steps, and PA runs higher than rigid filaments
+    "TPU":      dict(bed=50, temps=[220, 215, 210, 205, 200, 195, 190], fan=128,
+                     rspeed=20, start_retract=0.4, vmax=30, v0=2, speed_step=1,
+                     pa=[0.0, 0.02, 0.04, 0.06, 0.08, 0.10, 0.12, 0.14, 0.16]),
     "ASA_OVERTURE": dict(bed=100, temps=[270, 265, 260, 255, 250, 245, 240], fan=0,
                      rspeed=40, start_retract=0.5, vmax=50, tower_brim=15, bridge_speed=25, overhang_fan=40),
     "ASA":      dict(bed=105, temps=[260, 255, 250, 245, 240, 235, 230], fan=0,
@@ -82,9 +92,10 @@ PROFILES = {
 }
 P = PROFILES[MAT]
 VMAX = P["vmax"]
-PA_VALUES = [round(0.01 * i, 2) for i in range(9)]       # 0.00 .. 0.08
-FLOWS = [92, 96, 100, 104, 108]
-RETRACTS = [round(0.2 + 0.1 * k, 1) for k in range(11)]  # 0.2 .. 1.2, one per 1mm of tower
+PA_VALUES = P.get("pa", [round(0.01 * i, 2) for i in range(9)])   # 0.00 .. 0.08 unless the profile says
+FLOWS = list(range(92, 110, 2))                          # 92 .. 108 in 2% steps (9 blocks)
+FINE_OFFSETS = [-3, -2, -1, 0, 1, 2, 3]                  # second tower: around the first tower's answer
+RETRACTS = [round(0.2 + 0.1 * k, 1) for k in range(11)]  # 0.2 .. 1.2, one per 2mm of tower
 TOLERANCES = [0, 0.05, 0.1, 0.2, 0.3, 0.4]               # OrcaToleranceTest hole clearances
 
 # Printer (calsuite.sh PRINTER=...): bed size and nozzle. The plate below is laid out for 300mm
@@ -98,13 +109,13 @@ BASE_H = 0.45                                            # PA triangle solid bot
 FIL_A = math.pi * (1.75 / 2) ** 2
 TRAVEL_F, FIRST_F = 200 * 60, 25 * 60
 TEST_F = VMAX * 60                                       # walls and fill of every test
-V0 = round(VMAX * LH * (0.5 if NOZZLE == 0.4 else W))   # label top speed as mm3/s (0.2 x 0.5 line)
-SPEED_STEP = 2 if NOZZLE <= 0.4 else 3                    # bigger nozzles flow more: wider steps
+V0 = P.get("v0", round(VMAX * LH * (0.5 if NOZZLE == 0.4 else W)))   # label top speed as mm3/s (0.2 x 0.5 line)
+SPEED_STEP = P.get("speed_step", 2 if NOZZLE <= 0.4 else 3)          # bigger nozzles flow more: wider steps
 SPEED_VOLS = list(range(V0, V0 + 12 * SPEED_STEP, SPEED_STEP))   # 12 bands, e.g. 8 .. 30 mm3/s
 SPEED_LH = round(NOZZLE * 0.8, 2)                        # Orca's vase layer (0.32mm for 0.4)
 SPEED_LAYERS = 8 if NOZZLE <= 0.4 else 5                 # 12 bands stay under the gantry clearance
 SPEED_BAND = round(SPEED_LH * SPEED_LAYERS, 2)           # 8 vase layers of 0.32mm per band
-RETRACT_BASE, RETRACT_BAND = 0.4, 1.0                    # Orca: base 0.4mm, one step per 1mm
+RETRACT_BASE, RETRACT_BAND = 0.4, 2.0                    # Orca: base 0.4mm; one step per 2mm (two ticks): stringing reads better
 
 # ---- Stealthburner clearance for tests printed one after another (OrcaSlicer standard values)
 CLEAR_RADIUS = 65.0      # extruder_clearance_radius: a taller finished test stays >= half of it away
@@ -268,7 +279,9 @@ PURGE_F = 12 / (PURGE_H * PURGE_W) * 60                  # 12 mm3/s, like the KA
 def prime(y0):
     """Purge pad in the empty left lane before the next test: refills the nozzle after a
     question pause (ooze) and after the speed test (it runs past the hotend's limit and can
-    leave the nozzle starved). Four 25mm lines side by side, X 4.4 .. 8, Y y0 .. y0+25."""
+    leave the nozzle starved). Four 25mm lines side by side, X 4.4 .. 8, Y y0 .. y0+25; near
+    the back edge the pad moves forward in the (empty) lane so it stays on the bed."""
+    y0 = min(y0, BED - 2 - PURGE_LEN)
     x0 = WAIT_X - (PURGE_LINES - 1) * PURGE_W
     g(f"G0 X{x0:.3f} Y{y0:.3f} F{TRAVEL_F}"); pos[0], pos[1] = x0, y0
     g(f"G1 Z{PURGE_H:.3f} F1200")
@@ -358,10 +371,23 @@ TRI_SIDE = 22.0
 TRI_H = TRI_SIDE * math.sqrt(3) / 2
 PA_X = [OFF + 35 + i * 30 for i in range(len(PA_VALUES))]     # 35 .. 275
 PA_TOP = BASE_H + 0.8                                   # 2 solid layers + 4 wall layers
-FLOW_X, FLOW_W, FLOW_D, FLOW_H = [OFF + x for x in (70.0, 110.0, 150.0, 190.0, 230.0)], 25.0, 12.5, 1.65   # 8 solid layers
+FLOW_W, FLOW_D, FLOW_H = 16.0, 12.5, 1.65              # 8 solid layers
+FLOW_X = [OFF + 31.0 + 31.0 * k for k in range(len(FLOWS))]   # 31 .. 279: LOW_GAP (15) between blocks
 
-ROW = {k: OFF + y for k, y in dict(temp=25, speed=101, pa=176, flow=207, last=254).items()}   # Y centre of each row, front to back
+# Y centre of each row, front to back. Both towers are taller than the gantry clearance, so
+# everything printed after one stands behind it (CLEAR_RADIUS / 2 from its body)
+ROW = {k: OFF + y for k, y in dict(temp=25, speed=101, pa=176, flow=207, last=254).items()}
 TOWER = Orca("temp", OFF + 150, ROW["temp"])
+if FINE_ON:
+    # Fine tower behind the rough one: its body CLEAR_RADIUS / 2 behind the rough body, its brim
+    # LOW_GAP behind the rough brim; then everything after moves back by as much as it needs
+    depth = TOWER.foot[2][1] - TOWER.foot[0][1]
+    brim = (TOWER.brim[2][1] - TOWER.foot[2][1]) if TOWER.brim else 0.0
+    ROW["fine"] = ROW["temp"] + max(depth + CLEAR_RADIUS / 2, depth + 2 * brim + LOW_GAP) + 0.5
+    shift = ROW["fine"] - ROW["temp"]
+    for k in ("speed", "pa", "flow", "last"):
+        ROW[k] += shift
+    FINE = Orca("temp_fine", OFF + 150, ROW["fine"])
 SPEED = Orca("speed", OFF + 150, ROW["speed"])
 RETRACT = Orca("retract", OFF + 80, ROW["last"])
 TOL = Orca("tolerance", OFF + 165, ROW["last"])
@@ -369,6 +395,8 @@ TOL = Orca("tolerance", OFF + 165, ROW["last"])
 TOWER_TEMPS = list(range(int(TOWER.header["high"]), int(TOWER.header["low"]) - 1, -5))
 if TOWER_TEMPS != P["temps"]:
     sys.exit(f"temp.gcode has blocks {TOWER_TEMPS}, profile {MAT} wants {P['temps']}")
+if FINE_ON and abs(FINE.height - 10 * len(FINE_OFFSETS)) > 0.3:
+    sys.exit(f"temp_fine.gcode is {FINE.height}mm tall, want {10 * len(FINE_OFFSETS)} (one 10mm block per offset)")
 if abs(SPEED.height - SPEED_BAND * len(SPEED_VOLS)) > 0.01:
     sys.exit(f"speed.gcode is {SPEED.height}mm tall, want {SPEED_BAND * len(SPEED_VOLS):.2f}mm")
 if SPEED.height > GANTRY_H:
@@ -379,6 +407,7 @@ if RETRACT.height < RETRACT_BASE + RETRACT_BAND * len(RETRACTS) - 0.01:
 # (name, footprint, height) in print order
 PLAN = [
     ("temp_tower", TOWER.foot, TOWER.height),
+] + ([("fine_tower", FINE.foot, FINE.height)] if FINE_ON else []) + [
     ("max_flow", SPEED.foot, SPEED.height),
     ("pa_triangles", rect(PA_X[0] - TRI_SIDE / 2, ROW["pa"] - TRI_H / 2, PA_X[-1] + TRI_SIDE / 2, ROW["pa"] + TRI_H / 2),
      PA_TOP),
@@ -396,6 +425,8 @@ TRI_OBJECTS = [(f"pa_{k + 1}", rect(PA_X[k] - TRI_SIDE / 2, ROW["pa"] - TRI_H / 
                for k in range(len(PA_VALUES))]
 if PA_TOP > LOW_H or PA_X[1] - PA_X[0] - TRI_SIDE < TRI_NOZZLE_GAP:
     sys.exit("PA triangles printed one by one must stay low and at least TRI_NOZZLE_GAP apart")
+if (PA_X[-1] + TRI_SIDE / 2) > BED:
+    sys.exit("PA triangles run off the bed")
 
 FLOW_OBJECTS = [(f"flow_{k + 1}", rect(cx - FLOW_W / 2, ROW["flow"] - FLOW_D / 2, cx + FLOW_W / 2, ROW["flow"] + FLOW_D / 2), FLOW_H + LH)
                 for k, cx in enumerate(FLOW_X)]
@@ -403,7 +434,7 @@ if FLOW_H + LH > LOW_H or FLOW_X[1] - FLOW_X[0] - FLOW_W < LOW_GAP:
     sys.exit("flow blocks printed one by one must stay under LOW_H and at least LOW_GAP apart")
 
 # First-layer brims (one layer tall) around tests that have one: low parts for clearance
-BRIMS = {n: b for n, b in (("temp_tower", TOWER.brim), ("max_flow", SPEED.brim),
+BRIMS = {n: b for n, b in (("temp_tower", TOWER.brim), ("fine_tower", FINE.brim if FINE_ON else None), ("max_flow", SPEED.brim),
                            ("retraction", RETRACT.brim), ("tolerance", TOL.brim)) if b}
 
 def objects():
@@ -484,9 +515,34 @@ state["safe_z"] = max(state["safe_z"], TOWER.height)
 g("EXCLUDE_OBJECT_END NAME=temp_tower")
 gap = gap_behind("temp_tower")
 wait_spot(gap)
-ask("temp", f"{NAME} 1/6: temperature",
-    f"Orca tower: each 10mm block is labelled with its temperature, walls at {VMAX}mm/s. Speed first: pick the HOTTEST block whose overhang, bridge and cone are still clean (more heat = more flow).",
+ask("temp", f"{NAME} 1/7: rough temperature" if FINE_ON else f"{NAME} 1/6: temperature",
+    f"Orca tower: each 10mm block is labelled with its temperature, walls at {VMAX}mm/s. Speed first: pick the HOTTEST block whose overhang, bridge and cone are still clean (more heat = more flow). A second tower then tries 1C steps around your pick.",
     P["temps"], [f"{t}C" for t in P["temps"]])
+
+# ================================================================ 1b. fine temperature tower
+# Same Orca tower, one 10mm block per offset around the first answer (-3 .. +3 C from the
+# bottom). The temperatures are only known at print time: _CAL_FINE_TEMP sets them from the
+# answer, and _CAL_ASK_FINE_TEMP builds the buttons. The numbers moulded on these blocks are
+# the rough tower's and do not apply: count blocks from the bottom.
+if FINE_ON:
+  g("_CAL_APPLY WHAT=temp")
+  prime(gap)
+  g("EXCLUDE_OBJECT_START NAME=fine_tower")
+  route(*FINE.start, gap)
+  cur = [None]
+  def fine_layer(z):
+      b = min(int((z - 0.1) // 10), len(FINE_OFFSETS) - 1)
+      if b != cur[0]:
+          cur[0] = b
+          g(f"; ---- fine block {b + 1}: answer {FINE_OFFSETS[b]:+d}C from Z={z}")
+          g(f"_CAL_FINE_TEMP OFFSET={FINE_OFFSETS[b]}")
+  FINE.emit(on_layer=fine_layer)
+  g("SET_VELOCITY_LIMIT ACCEL=3000 SQUARE_CORNER_VELOCITY=5")
+  state["safe_z"] = max(state["safe_z"], FINE.height)
+  g("EXCLUDE_OBJECT_END NAME=fine_tower")
+  gap = gap_behind("fine_tower")
+  wait_spot(gap)
+  g(f'_CAL_ASK_FINE_TEMP NAME={NAME} OFFSETS={",".join(str(o) for o in FINE_OFFSETS)}')
 
 # ================================================================ 2. Orca max volumetric speed (vase)
 g("_CAL_APPLY WHAT=temp")
@@ -515,7 +571,7 @@ g("EXCLUDE_OBJECT_END NAME=max_flow")
 gap = gap_behind("max_flow")
 wait_spot(gap)
 bands = [f"{v} ({b * SPEED_BAND:.1f}-{(b + 1) * SPEED_BAND:.1f}mm)" for b, v in enumerate(SPEED_VOLS)]
-ask("max_flow", f"{NAME} 2/6: max volumetric speed",
+ask("max_flow", f"{NAME} 3/7: max volumetric speed",
     f"Orca speed test (60% size), single wall: every {SPEED_BAND}mm band ({SPEED_LAYERS} layers) is {SPEED_STEP} mm3/s faster, from {V0} mm3/s ({VMAX}mm/s at 0.2mm layers) at the bed. Measure from the bed up to where the wall first gets rough, thin or gappy and pick the LAST band below it.",
     SPEED_VOLS, bands)
 
@@ -551,7 +607,7 @@ state["safe_z"] = max(state["safe_z"], PA_TOP)
 g("SET_VELOCITY_LIMIT ACCEL=3000 SQUARE_CORNER_VELOCITY=5")
 gap = gap_behind("pa_triangles")
 wait_spot(gap)
-ask("pa", f"{NAME} 3/6: pressure advance",
+ask("pa", f"{NAME} 4/7: pressure advance",
     f"Each triangle was printed on its own with its PA value printed on its filled bottom; walls ran at {VMAX}mm/s. Pick the one with the sharpest corners and even line width.",
     PA_VALUES, [fmt(p) for p in PA_VALUES])
 
@@ -579,13 +635,13 @@ for k, (cx, fl) in enumerate(zip(FLOW_X, FLOWS)):
                    FIRST_F if i == 0 else TEST_F, FIRST_F if i == 0 else (50 * 60 if top else TEST_F))
     z = round(FLOW_H + LH, 3)
     g(f"G1 Z{z:.3f} F1200"); g("M221 S100")
-    emboss_top(f"{fl}%", cx, cy, z, 1.2)
+    emboss_top(str(fl), cx, cy, z, min(1.2, (FLOW_W - 3) / text_width(str(fl), 1.0)))
     g(f"EXCLUDE_OBJECT_END NAME=flow_{k + 1}")
 state["safe_z"] = max(state["safe_z"], FLOW_H + LH)
 gap = gap_behind("flow")
 wait_spot(gap)
-ask("flow", f"{NAME} 4/6: flow",
-    "Each block was printed on its own and shows its flow on top. Pick the smoothest, fully closed top surface.",
+ask("flow", f"{NAME} 5/7: flow",
+    "Each block was printed on its own and shows its flow (%) on top. Pick the smoothest, fully closed top surface.",
     FLOWS, [f"{f}%" for f in FLOWS])
 
 # ================================================================ 5. Orca retraction tower
@@ -606,8 +662,8 @@ state["safe_z"] = max(state["safe_z"], RETRACT.height)
 g("EXCLUDE_OBJECT_END NAME=retraction")
 gap = gap_behind("retraction")
 wait_spot(gap)
-ask("retract_len", f"{NAME} 5/6: retraction",
-    f"Orca retraction tower: the length goes up 0.1mm every 1mm (one tick on the pillars), from {RETRACTS[0]}mm just above the base to {RETRACTS[-1]}mm at the top, printed at {VMAX}mm/s. Pick the lowest band with no strings between the pillars.",
+ask("retract_len", f"{NAME} 6/7: retraction",
+    f"Orca retraction tower: the length goes up 0.1mm every 2mm (two ticks on the pillars), from {RETRACTS[0]}mm just above the base to {RETRACTS[-1]}mm at the top, printed at {VMAX}mm/s. Pick the lowest band with no strings between the pillars.",
     RETRACTS, [f"{r}mm (Z{RETRACT_BASE + k * RETRACT_BAND:.1f}-{RETRACT_BASE + (k + 1) * RETRACT_BAND:.1f})"
                for k, r in enumerate(RETRACTS)])
 
@@ -621,7 +677,7 @@ TOL.emit()
 state["safe_z"] = max(state["safe_z"], TOL.height)
 g("EXCLUDE_OBJECT_END NAME=tolerance")
 wait_spot(gap)
-ask("tolerance", f"{NAME} 6/6: tolerance",
+ask("tolerance", f"{NAME} 7/7: tolerance",
     "Orca tolerance test: pop the hex key out of the 0.4mm hole and try it in each hole (0, 0.05, 0.1, 0.2, 0.3, 0.4mm clearance). Pick the TIGHTEST hole the key slides into without forcing.",
     TOLERANCES, [f"{fmt(t)}mm" for t in TOLERANCES])
 
@@ -630,7 +686,7 @@ g("_CAL_REPORT")
 g("PRINT_END")
 
 # ================================================================ resume: later tests only
-SECTION_OBJECTS = dict(temp=["temp_tower"], speed=["max_flow"], pa=[n for n, r, h in TRI_OBJECTS],
+SECTION_OBJECTS = dict(temp=["temp_tower"] + (["fine_tower"] if FINE_ON else []), speed=["max_flow"], pa=[n for n, r, h in TRI_OBJECTS],
                        flow=[n for n, r, h in FLOW_OBJECTS], retract=["retraction"], tolerance=["tolerance"])
 already = [n for sec in SECTIONS[:SECTIONS.index(FROM)] for n in SECTION_OBJECTS[sec]]
 if FROM != "temp":

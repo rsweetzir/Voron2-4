@@ -101,7 +101,10 @@ for f in gone:
 print(f"Deployed {len(changes)} file(s); previous versions in config/{backup}/")
 
 if RESTART:
-    moonraker("/printer/restart", "POST")
+    try:
+        moonraker("/printer/restart", "POST")
+    except OSError:
+        pass                                   # the restart drops the request; the state poll below reports
     for _ in range(40):
         time.sleep(3)
         try:

@@ -45,8 +45,11 @@ EOF
 # 12 bands of 8 vase layers (0.8 x nozzle; 5 layers for bigger nozzles), as calsuite.py
 SPEED_H=$(python3 -c "n=float('${CALSUITE_NOZZLE:-0.4}'); print(round(12*round(n*0.8,2)*(8 if n<=0.4 else 5),2))")
 CALSUITE_TOWER_BRIM=$TOWER_BRIM CALSUITE_BRIDGE_SPEED=$BRIDGE_SPEED CALSUITE_OVERHANG_FAN=$OVERHANG_FAN "$PY" orca_calib.py temp "$HIGH" "$LOW" "$VMAX" "$WORK/temp.gcode"
+# fine tower: the same Orca tower, 7 blocks (its temperatures are set at print time)
+CALSUITE_TOWER_BRIM=$TOWER_BRIM CALSUITE_BRIDGE_SPEED=$BRIDGE_SPEED CALSUITE_OVERHANG_FAN=$OVERHANG_FAN "$PY" orca_calib.py temp "$HIGH" "$((HIGH - 30))" "$VMAX" "$WORK/temp.gcode.fine" && mv "$WORK/temp.gcode.fine" "$WORK/temp_fine.gcode"
+sed -i.bak '1s/^; orca calib temp /; orca calib temp_fine /' "$WORK/temp_fine.gcode"
 "$PY" orca_calib.py speed "$SPEED_H" 0.6 "$WORK/speed.gcode"
-"$PY" orca_calib.py retract 11.4 "$VMAX" "$WORK/retract.gcode"
+"$PY" orca_calib.py retract 22.4 "$VMAX" "$WORK/retract.gcode"     # 0.4 base + 11 x 2mm bands
 "$PY" orca_calib.py tolerance "$VMAX" "$WORK/tolerance.gcode"
 FROM=$(printf '%s\n' "$@" | sed -n 's/^FROM=//p' | tr 'A-Z' 'a-z')
 OUT="$WORK/${NAME}_calibration_suite_v5${FROM:+_from_$FROM}.gcode"
