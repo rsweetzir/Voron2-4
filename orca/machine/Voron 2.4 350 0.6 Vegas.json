@@ -84,24 +84,24 @@
         "5000"
     ],
     "machine_max_acceleration_extruding": [
-        "20000",
-        "20000"
+        "2000",
+        "2000"
     ],
     "machine_max_acceleration_retracting": [
         "5000",
         "5000"
     ],
     "machine_max_acceleration_travel": [
-        "20000",
-        "20000"
+        "2000",
+        "2000"
     ],
     "machine_max_acceleration_x": [
-        "20000",
-        "20000"
+        "2000",
+        "2000"
     ],
     "machine_max_acceleration_y": [
-        "20000",
-        "20000"
+        "2000",
+        "2000"
     ],
     "machine_max_acceleration_z": [
         "500",
@@ -131,11 +131,11 @@
         "25"
     ],
     "machine_max_speed_x": [
-        "500",
+        "200",
         "200"
     ],
     "machine_max_speed_y": [
-        "500",
+        "200",
         "200"
     ],
     "machine_max_speed_z": [
