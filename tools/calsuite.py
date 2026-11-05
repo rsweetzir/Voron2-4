@@ -83,7 +83,7 @@ PROFILES = {
     # Elastic TPU (unbranded, orange): box 170-220C, 20-40 mm/s. Slow: vmax 30. TPU flows little,
     # so the max-flow bands start at 2 mm3/s in 1 mm3/s steps, and PA runs higher than rigid filaments
     "TPU":      dict(bed=50, temps=[220, 215, 210, 205, 200, 195, 190], fan=128,
-                     rspeed=20, start_retract=0.4, vmax=30, v0=2, speed_step=1,
+                     rspeed=20, start_retract=0.4, vmax=30, v0=2, speed_step=1, tower_retract=0,
                      pa=[0.0, 0.02, 0.04, 0.06, 0.08, 0.10, 0.12, 0.14, 0.16]),
     "ASA_OVERTURE": dict(bed=100, temps=[270, 265, 260, 255, 250, 245, 240], fan=0,
                      rspeed=40, start_retract=0.5, vmax=50, tower_brim=15, bridge_speed=25, overhang_fan=40),
@@ -492,6 +492,10 @@ for name, r, h in objects():
 g(f"_CAL_BEGIN FILAMENT={NAME} TEMP={P['temps'][0]} RETRACT={P['start_retract']} RETRACT_SPEED={P['rspeed']}")
 g(f"PRINT_START EXTRUDER={P['temps'][0]} BED={P['bed']} FILAMENT={MAT}")   # fresh adaptive mesh
 g("_CAL_APPLY WHAT=retract")
+if P.get("tower_retract") is not None:
+    # tower_retract (profile): retraction during both temperature towers, e.g. 0 for TPU: it
+    # swelled and jammed with 0.4mm retractions (2026-11-05). The other tests use start_retract
+    g(f"SET_RETRACTION RETRACT_LENGTH={P['tower_retract']}")
 g("SET_PRESSURE_ADVANCE ADVANCE=0")
 g("SET_VELOCITY_LIMIT VELOCITY=300 ACCEL=3000 SQUARE_CORNER_VELOCITY=5")
 g("G90"); g("M83"); g("M107")
@@ -546,6 +550,7 @@ if FINE_ON:
 
 # ================================================================ 2. Orca max volumetric speed (vase)
 g("_CAL_APPLY WHAT=temp")
+g("_CAL_APPLY WHAT=retract")                             # back to start_retract after the towers
 prime(gap)
 mark["speed"] = len(out)
 g("EXCLUDE_OBJECT_START NAME=max_flow")

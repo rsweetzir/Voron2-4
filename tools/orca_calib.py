@@ -124,7 +124,8 @@ def resolve(name):
     return full
 
 machine = resolve(MACHINE)
-machine.update(type="machine", inherits=MACHINE_PARENT, machine_start_gcode="", machine_end_gcode="")
+machine.update(type="machine", inherits=MACHINE_PARENT, machine_start_gcode="", machine_end_gcode="",
+               layer_change_gcode="")   # no printer macros in the test models (_WOOD_GRAIN_LAYER is Edmonton-only)
 if NOZZLE != 0.4 or BED != 300:
     b = f"{BED:g}"
     machine.update(nozzle_diameter=[f"{NOZZLE:g}"], printable_area=["0x0", f"{b}x0", f"{b}x{b}", f"0x{b}"],
