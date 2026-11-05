@@ -30,5 +30,8 @@
     "exclude_object": "1",
     "gcode_label_objects": "1",
     "outer_wall_speed": "100",
-    "inner_wall_speed": "150"
+    "inner_wall_speed": "150",
+    "initial_layer_speed": "20",
+    "initial_layer_infill_speed": "30",
+    "slow_down_layers": "3"
 }

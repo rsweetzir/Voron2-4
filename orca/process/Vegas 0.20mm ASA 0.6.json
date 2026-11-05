@@ -41,5 +41,8 @@
     "compatible_printers": [
         "Voron 2.4 350 0.6 Vegas"
     ],
-    "compatible_printers_condition": ""
+    "compatible_printers_condition": "",
+    "initial_layer_speed": "20",
+    "initial_layer_infill_speed": "30",
+    "slow_down_layers": "3"
 }
