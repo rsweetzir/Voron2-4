@@ -1,0 +1,89 @@
+{
+    "from": "User",
+    "inherits": "Generic TPU @System",
+    "name": "Vegas Orange TPU",
+    "filament_settings_id": [
+        "Vegas Orange TPU"
+    ],
+    "version": "2.4.0.2",
+    "filament_type": [
+        "TPU"
+    ],
+    "nozzle_temperature": [
+        "240"
+    ],
+    "nozzle_temperature_initial_layer": [
+        "240"
+    ],
+    "cool_plate_temp": [
+        "50"
+    ],
+    "eng_plate_temp": [
+        "50"
+    ],
+    "hot_plate_temp": [
+        "50"
+    ],
+    "textured_plate_temp": [
+        "50"
+    ],
+    "cool_plate_temp_initial_layer": [
+        "50"
+    ],
+    "eng_plate_temp_initial_layer": [
+        "50"
+    ],
+    "hot_plate_temp_initial_layer": [
+        "50"
+    ],
+    "textured_plate_temp_initial_layer": [
+        "50"
+    ],
+    "fan_min_speed": [
+        "100"
+    ],
+    "fan_max_speed": [
+        "100"
+    ],
+    "close_fan_the_first_x_layers": [
+        "1"
+    ],
+    "filament_max_volumetric_speed": [
+        "12"
+    ],
+    "filament_flow_ratio": [
+        "1.02"
+    ],
+    "enable_pressure_advance": [
+        "0"
+    ],
+    "filament_start_gcode": [
+        "; Orange Elastic TPU on Vegas (calibration suite v5, 2026-11-06): 240C (the box's 170-220C starves on this hotend), max 12 mm3/s, flow 102%, retract 0.2 (longer retractions starve the next part; stringing does not improve with length). Dry it first (55C, 8h). Bed 50 and exhaust 100%: at bed 70 the closed chamber softened the TPU above the hotend and it jammed (2026-11-07). Nothing slower than 15 mm/s: TPU that crawls through the hotend softens above the melt zone and jams (layer 62 internal bridge, 2026-11-07; 150% speed helped). Klipper owns PA and retraction\nSET_PRESSURE_ADVANCE ADVANCE=0.12\nSET_RETRACTION RETRACT_LENGTH=0.2 RETRACT_SPEED=30 UNRETRACT_SPEED=30\nSET_FAN_SPEED FAN=exhaust_fan SPEED=1.0"
+    ],
+    "compatible_prints": [
+        "Vegas 0.20mm TPU 0.6"
+    ],
+    "compatible_prints_condition": "",
+    "filament_z_hop": [
+        "0"
+    ],
+    "filament_wipe": [
+        "1"
+    ],
+    "filament_retract_when_changing_layer": [
+        "0"
+    ],
+    "filament_vendor": [
+        "Generic"
+    ],
+    "compatible_printers": [
+        "Voron 2.4 350 0.6 Vegas"
+    ],
+    "compatible_printers_condition": "",
+    "filament_retraction_minimum_travel": [
+        "3"
+    ],
+    "slow_down_min_speed": [
+        "15"
+    ]
+}
