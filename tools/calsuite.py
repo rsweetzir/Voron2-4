@@ -80,10 +80,15 @@ PROFILES = {
     # on bridges and overhangs past 50% (general cooling stays at fan=0, as the box says)
     # Overture ASA (Vegas): box 240-270C, bed 70-95C (100C here, as Polymaker's brim curled at 95C),
     # 30-50 mm/s, fan off
-    # Elastic TPU (unbranded, orange): box 170-220C, 20-40 mm/s. Slow: vmax 30. TPU flows little,
-    # so the max-flow bands start at 2 mm3/s in 1 mm3/s steps, and PA runs higher than rigid filaments
-    "TPU":      dict(bed=50, temps=[220, 215, 210, 205, 200, 195, 190], fan=128,
-                     rspeed=20, start_retract=0.4, vmax=30, v0=2, speed_step=1, tower_retract=0,
+    # Elastic TPU (unbranded, orange): box 170-220C, 20-40 mm/s. The box range was wrong for the Las
+    # Vegas hotend: towers at 220 -> 190C starved and foamed worse as the temperature dropped
+    # (2026-11-06), while a tray printed well on it (2025-12) at 240C, bed 70, fan 100%,
+    # 3.2 mm3/s, retract 0.4 @ 30. So the towers run 250 -> 220C around that, at <= 3.2 mm3/s.
+    # No retraction outside the retraction test: with 0.4 @ 30 the flow blocks starved one after
+    # another once the retractions started (2026-11-06); the retraction tower finds what it takes.
+    # Max-flow bands from 2 mm3/s in 1 mm3/s steps; PA runs higher than rigid filaments
+    "TPU":      dict(bed=70, temps=[250, 245, 240, 235, 230, 225, 220], fan=255,
+                     rspeed=30, start_retract=0.0, vmax=24, v0=2, speed_step=1, tower_retract=0.0,
                      pa=[0.0, 0.02, 0.04, 0.06, 0.08, 0.10, 0.12, 0.14, 0.16]),
     "ASA_OVERTURE": dict(bed=100, temps=[270, 265, 260, 255, 250, 245, 240], fan=0,
                      rspeed=40, start_retract=0.5, vmax=50, tower_brim=15, bridge_speed=25, overhang_fan=40),
@@ -121,7 +126,10 @@ RETRACT_BASE, RETRACT_BAND = 0.4, 2.0                    # Orca: base 0.4mm; one
 CLEAR_RADIUS = 65.0      # extruder_clearance_radius: a taller finished test stays >= half of it away
 LOW_H, LOW_GAP = 2.0, 15.0   # tests up to LOW_H pass under the ducts and need only LOW_GAP
 GANTRY_H = 34.0          # extruder_clearance_height_to_rod (36) less 2mm: taller tests stay in front
-WAIT_X = 8.0             # empty left lane: pauses and prime lines
+# empty left lane: pauses and prime lines. Moves with the plate on a bigger bed (OFF): at X 4-8
+# the prime pad left the X range once skew correction shifted it (Las Vegas skew moves X by up to
+# -6.3mm at the back: "Move out of range: -0.283 258.926", the PA answer cancelled the run 2026-11-06)
+WAIT_X = 8.0 + OFF
 
 out, pos, state = [], [0.0, 0.0], {"safe_z": 0.0, "retracted": False}
 g = out.append
