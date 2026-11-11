@@ -55,7 +55,7 @@
         "3"
     ],
     "filament_max_volumetric_speed": [
-        "28"
+        "19"
     ],
     "filament_flow_ratio": [
         "1"
@@ -64,20 +64,20 @@
         "0"
     ],
     "filament_start_gcode": [
-        "; Overture ASA on Vegas (calibration suite v5, 2026-11-03): 245C, max 28 mm3/s, flow 100%; Klipper owns PA and retraction\nSET_PRESSURE_ADVANCE ADVANCE=0.04\nSET_RETRACTION RETRACT_LENGTH=0.2 RETRACT_SPEED=40 UNRETRACT_SPEED=30"
+        "; Overture ASA on Vegas (calibration suite v5, 2026-11-08/09, after the CW2 rebuild and rotation_distance 22.66): 245C, max 19 mm3/s, flow 100%, PA 0.03, retract 0.2; Klipper owns PA and retraction\nSET_PRESSURE_ADVANCE ADVANCE=0.03\nSET_RETRACTION RETRACT_LENGTH=0.2 RETRACT_SPEED=40 UNRETRACT_SPEED=30"
     ],
     "compatible_prints": [
         "Voron 0.20mm ASA"
     ],
     "compatible_prints_condition": "",
     "filament_z_hop": [
-        "0.4"
+        "0.2"
     ],
     "filament_z_hop_types": [
-        "Normal Lift"
+        "Spiral Lift"
     ],
     "filament_retract_lift_enforce": [
-        "All Surfaces"
+        "Top Only"
     ],
     "filament_retract_when_changing_layer": [
         "1"
@@ -88,5 +88,11 @@
     "compatible_printers": [
         "Voron 2.4 350 0.6 Vegas"
     ],
-    "compatible_printers_condition": ""
+    "compatible_printers_condition": "",
+    "filament_wipe": [
+        "1"
+    ],
+    "filament_wipe_distance": [
+        "1.5"
+    ]
 }

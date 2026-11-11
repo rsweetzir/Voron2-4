@@ -27,3 +27,15 @@ Read `docs/printer-parity.md` before changing any Klipper macro or printer confi
 - Comments explain *why* (what went wrong without it, with the date), as in the existing files.
 - Klipper on these printers: `[gcode_arcs]` is required (Orca arc fitting), Mainsail
   "Save Z offset" must not be used (eddy probe: it shifts the calibration table).
+
+## Gridfinity prints (rule set by the repository owner, 2026-11-09)
+
+- Slice with mouse ears (`brim_type: brim_ears`): each Gridfinity foot is its own small pad on the bed
+  and its corners lift. Process presets: `Vegas 0.20mm ASA Gridfinity 0.6`, `Vegas 0.20mm TPU 0.6`.
+- The floor above the tapered feet spans the gaps between them: it must print as a bridge across
+  the gap the short way (Orca bridge detection, `bridge_angle` 0 = auto, thick bridges), never as
+  solid infill running the long way over air. Check the slice: the first layer over the gaps has
+  `;TYPE:Bridge` / `Internal Bridge`, and its lines cross the channels.
+- Upload to the printer's `Gridfinity/` folder (Moonraker upload with `path=Gridfinity`).
+- Light by default: 2 walls (about 1.25 mm with the 0.6 nozzle) and 10% gyroid; walls and solid floors
+  are most of a bin's weight, infill the least (set in the Gridfinity process preset).
