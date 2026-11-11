@@ -14,7 +14,7 @@ Prints, front to back, one test at a time (OrcaSlicer models sliced by tools/orc
                                                               -> asks: last good band
   3. Pressure-advance triangles with solid-filled bottoms (no square base), each printed
      on its own from bottom to top at its PA value           -> asks: sharpest triangle
-  4. Flow blocks (25 x 12.5mm, 1.65mm solid), each printed on its own at its flow
+  4. Flow blocks (16 x 25mm, 1.65mm solid), each printed on its own at its flow
                                                               -> asks: smoothest top
   5. Retraction: Orca's retraction_tower (two pillars), retraction length changes every
      1mm (one tick on the pillars)                            -> asks: lowest clean length
@@ -379,12 +379,12 @@ TRI_SIDE = 22.0
 TRI_H = TRI_SIDE * math.sqrt(3) / 2
 PA_X = [OFF + 35 + i * 30 for i in range(len(PA_VALUES))]     # 35 .. 275
 PA_TOP = BASE_H + 0.8                                   # 2 solid layers + 4 wall layers
-FLOW_W, FLOW_D, FLOW_H = 16.0, 12.5, 1.65              # 8 solid layers
+FLOW_W, FLOW_D, FLOW_H = 16.0, 25.0, 1.65              # 8 solid layers; 25 deep (was 12.5: too small to judge the top, 2026-11-09)
 FLOW_X = [OFF + 31.0 + 31.0 * k for k in range(len(FLOWS))]   # 31 .. 279: LOW_GAP (15) between blocks
 
 # Y centre of each row, front to back. Both towers are taller than the gantry clearance, so
 # everything printed after one stands behind it (CLEAR_RADIUS / 2 from its body)
-ROW = {k: OFF + y for k, y in dict(temp=25, speed=101, pa=176, flow=207, last=254).items()}
+ROW = {k: OFF + y for k, y in dict(temp=25, speed=101, pa=176, flow=214, last=254).items()}
 TOWER = Orca("temp", OFF + 150, ROW["temp"])
 if FINE_ON:
     # Fine tower behind the rough one: its body CLEAR_RADIUS / 2 behind the rough body, its brim
