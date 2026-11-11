@@ -25,7 +25,8 @@ PRINTERS = {
                      obsolete=[]),
     "vegas": dict(ssh="voron-vegas", host="192.168.128.20", dir="vegas/klipper",
                   files=["printer.cfg", "eddy.cfg", "qgl.cfg", "bed_mesh.cfg", "KAMP_Settings.cfg",
-                         "menu.cfg", "calibration.cfg", "printer_settings.cfg", "purge.cfg", "calibrate.cfg"],
+                         "menu.cfg", "calibration.cfg", "printer_settings.cfg", "purge.cfg", "calibrate.cfg",
+                         "ebb_extruder.cfg"],
                   obsolete=["print_macros.cfg", "calsuite.cfg", "smart_home.cfg"]),
 }
 SHARED = ["print_flow.cfg", "calsuite.cfg"]
