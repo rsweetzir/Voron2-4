@@ -12,7 +12,7 @@ has to remember which printer does what.
 |---|---|---|
 | `klipper/shared/print_flow.cfg` | PRINT_START / _PRINT_START_FINISH / PRINT_END, heat soak, CANCEL_PRINT, PARK, SMART_HOME, SMART_QGL, QGL, G32, the QUAD_GANTRY_LEVEL wrapper, BED_LVL_MESH, eddy homing correction and tap (`_EDDY`, `SET_Z_FROM_PROBE`, `_TAP_Z`), FILAMENT_PARK / FILAMENT_LOADED, print bounds check | **repo** |
 | `klipper/shared/calsuite.cfg` | calibration suite prompts (`_CAL*`), `[save_variables]` | **repo** |
-| `<printer>/printer_settings.cfg` | `_PRINTER_SETTINGS`: bed centre, skew, filament park length, chamber target, saved mesh name, tap temperatures, soak park height, fine QGL height. Las Vegas also: `_CLIENT_VARIABLE`, `[firmware_retraction]` | repo |
+| `<printer>/printer_settings.cfg` | `_PRINTER_SETTINGS`: bed centre, skew, filament park length, chamber target, saved mesh name, tap temperatures, soak park height, fine QGL height, Z method (`tap` or `contactless`) and the contactless offset, soak bed boost (extra bed heat while waiting for the chamber). Las Vegas also: `_CLIENT_VARIABLE`, `[firmware_retraction]` | repo |
 | everything else in `klipper/` (Edmonton) or `vegas/klipper/` (Las Vegas) | hardware: MCUs, steppers, TMC, homing override (sensorless currents), probe, QGL points/corners, bed mesh area, extras only one printer has (wood grain, drift tests, TFT24 menu) | repo, but `SAVE_CONFIG` results live on the printer |
 
 The `#*# SAVE_CONFIG` block at the end of each `printer.cfg` (PID, eddy calibration, tap
@@ -50,13 +50,16 @@ block; `tools/sync-from-printer.sh` brings it back into the repo.
 PRINT_START  heat bed (nozzle off) -> SET_SKEW CLEAR -> G28 (Z contactless) -> park over bed centre
              at soak_park_z -> wait for bed -> non-blocking soak (QGL half-way through, nozzle
              warms to the tap temperature for the last 90 s)
-_PRINT_START_FINISH  QGL if not applied -> one tap at the bed centre (_TAP_Z) -> SET_SKEW ->
+_PRINT_START_FINISH  QGL if not applied -> Z0 at the bed centre (_TAP_Z: a tap, or the eddy
+             reading + contactless_z_offset when z_method is "contactless") -> SET_SKEW ->
              adaptive rapid_scan mesh -> nozzle to print temp -> KAMP purge -> print continues
              from the purge (no move back to the soak position)
 PRINT_END    retract, filament park (if enabled), heaters off, move off the part, mesh and skew
              cleared, speed factor 100%, PARK
 ```
-Z is homed once (contactless) and tapped once per print. QGL runs coarse + fine with no G28 Z in
+Z is homed once (contactless) and set once more at the bed centre per print: by a tap (Edmonton,
+`z_method: "tap"`) or by the eddy reading (Las Vegas since 2026-11-08, `z_method: "contactless"`:
+its taps moved 0.15-0.3 mm with nozzle residue and tap temperature). QGL runs coarse + fine with no G28 Z in
 between (the fine pass probes from `qgl_fine_z`, 10 mm).
 
 ## Making a change
