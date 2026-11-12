@@ -142,6 +142,9 @@ process = resolve("Voron 0.20mm PLA")
 process.update(type="process", name="calsuite " + KIND, print_settings_id="calsuite " + KIND,
                layer_height="0.2", initial_layer_print_height="0.25", skirt_loops="0",
                exclude_object="0", enable_arc_fitting="0",
+               # no scarf seam: its Z ramp is a burst of tiny moves (E.00001 segments) that, with
+               # input shaping on a Pi 3, ended two ASA runs in "Timer too close" (2026-11-11)
+               seam_slope_type="none",
                default_acceleration="3000", inner_wall_acceleration="3000", outer_wall_acceleration="3000",
                travel_acceleration="3000", top_surface_acceleration="2000", initial_layer_acceleration="500")
 if NOZZLE != 0.4:                              # the repo's process presets are 0.4mm lines
