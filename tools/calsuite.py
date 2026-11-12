@@ -321,13 +321,14 @@ class Orca:
         if not self.lines[0].startswith(f"; orca calib {kind} "):
             sys.exit(f"{path} is not orca_calib.py {kind} output")
         xs, ys, zs, self.first = [], [], [], None
-        bx, by = [], []                                      # moves above the first layer (no brim)
+        bx, by = [], []                                      # moves above the first layer / raft (no brim)
+        self.raft = float(self.header.get("raft", 0))       # towers stand on a raft (orca_calib.py header raft=Z)
         for l in self.lines:
             if l.startswith(("G0 ", "G1 ")):
                 d = dict(re.findall(r"([XYZ])(-?[\d.]+)", l.split(";")[0]))
                 if "X" in d: xs.append(float(d["X"]))
                 if "Y" in d: ys.append(float(d["Y"]))
-                if len(zs) > 1 and "E" in l and "X" in d and "Y" in d:
+                if len(zs) > 1 and zs[-1] > self.raft and "E" in l and "X" in d and "Y" in d:
                     bx.append(float(d["X"])); by.append(float(d["Y"]))
                 if self.first is None and "X" in d and "Y" in d:
                     self.first = (float(d["X"]), float(d["Y"]))
@@ -340,9 +341,12 @@ class Orca:
         # A brim is one layer tall: the toolhead clearance applies to the body above it, the
         # brim only needs the low-part gap. foot = body; brim = whole first layer (or None)
         body = rect(dn(min(bx) + self.dx), dn(min(by) + self.dy), up(max(bx) + self.dx), up(max(by) + self.dy)) if bx else full
-        has_brim = "brim" in self.header and float(self.header["brim"]) > 0 and body != full
+        # a raft (<= LOW_H) is a low part like a brim
+        has_brim = (float(self.header.get("brim", 0)) > 0 or self.raft > 0) and body != full
         self.foot, self.brim = (body, full) if has_brim else (full, None)
         self.height = max(zs)
+        # bands count from the model's Z0, above the raft
+        self.top = self.height - self.raft                   # model height above the raft
         self.start = (self.first[0] + self.dx, self.first[1] + self.dy)
 
     def emit(self, on_layer=None, on_extrude=None):
@@ -351,7 +355,7 @@ class Orca:
         z = 0.0
         for l in self.lines:
             if l.startswith(";Z:"):
-                z = float(l[3:])
+                z = max(float(l[3:]) - self.raft, 0.2)       # raft layers count as the first band
                 if on_layer: on_layer(z)
             c = l.split(";")[0].strip()
             if not c or c.startswith(("M73", "M104", "M109", "M140", "M190", "G21", "G90", "M83", "M106 P")):
@@ -405,14 +409,14 @@ TOL = Orca("tolerance", OFF + 165, ROW["last"])
 TOWER_TEMPS = list(range(int(TOWER.header["high"]), int(TOWER.header["low"]) - 1, -5))
 if TOWER_TEMPS != P["temps"]:
     sys.exit(f"temp.gcode has blocks {TOWER_TEMPS}, profile {MAT} wants {P['temps']}")
-if FINE_ON and abs(FINE.height - 10 * len(FINE_OFFSETS)) > 0.3:
-    sys.exit(f"temp_fine.gcode is {FINE.height}mm tall, want {10 * len(FINE_OFFSETS)} (one 10mm block per offset)")
+if FINE_ON and abs(FINE.top - 10 * len(FINE_OFFSETS)) > 0.3:
+    sys.exit(f"temp_fine.gcode is {FINE.top}mm tall, want {10 * len(FINE_OFFSETS)} (one 10mm block per offset)")
 if abs(SPEED.height - SPEED_BAND * len(SPEED_VOLS)) > 0.01:
     sys.exit(f"speed.gcode is {SPEED.height}mm tall, want {SPEED_BAND * len(SPEED_VOLS):.2f}mm")
 if SPEED.height > GANTRY_H:
     sys.exit("speed test is taller than the gantry clearance")
-if RETRACT.height < RETRACT_BASE + RETRACT_BAND * len(RETRACTS) - 0.01:
-    sys.exit(f"retract.gcode is {RETRACT.height}mm tall, want {RETRACT_BASE + RETRACT_BAND * len(RETRACTS):.2f}mm")
+if RETRACT.top < RETRACT_BASE + RETRACT_BAND * len(RETRACTS) - 0.01:
+    sys.exit(f"retract.gcode is {RETRACT.top}mm tall, want {RETRACT_BASE + RETRACT_BAND * len(RETRACTS):.2f}mm")
 
 # (name, footprint, height) in print order
 PLAN = [

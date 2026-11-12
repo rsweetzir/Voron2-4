@@ -49,11 +49,17 @@ def speeds(v):
     return dict(outer_wall_speed=v, inner_wall_speed=v, sparse_infill_speed=v, internal_solid_infill_speed=v,
                 top_surface_speed=v, gap_infill_speed=v, initial_layer_speed="25", initial_layer_infill_speed="25")
 
+# Tall towers stand on a raft: the ASA temperature tower broke free of its 15mm brim at 245C
+# (Las Vegas 2026-11-12). calsuite.py reads the raft height from the header and counts the
+# tower's temperature/retraction bands from the top of the raft.
+RAFT = dict(raft_layers="3", raft_first_layer_expansion="4", raft_expansion="2", raft_contact_distance="0.2",
+            brim_type="no_brim")
+
 if KIND == "temp":
     high, low, speed, out = int(ARGS[0]), int(ARGS[1]), int(ARGS[2]), ARGS[3]
     model, z0, z1 = "calib/temperature_tower/temperature_tower.drc", (500 - high) / 5 * 10, (500 - low) / 5 * 10 + 10
-    brim = os.environ.get("CALSUITE_TOWER_BRIM", "5")     # mm; calsuite.sh sets it per material (ASA 15)
-    proc, fil = dict(speeds(speed), brim_type="outer_only", brim_width=brim), {}
+    brim = "0"                                           # a raft instead of a brim (see RAFT below)
+    proc, fil = dict(speeds(speed), **RAFT), {}
     # Tall, thin tower (44 x 9 mm, 70 mm): the nozzle knocked it loose on fast travel twice (ASA,
     # Las Vegas 2026-11-11; curled overhang edges + 0.4 mm hop + 500 mm/s travel moves). Slower,
     # gentler travel, a higher hop, and travel that goes around the walls instead of over them.
@@ -88,7 +94,7 @@ elif KIND == "speed":
 elif KIND == "retract":
     height, speed, out = float(ARGS[0]), int(ARGS[1]), ARGS[2]
     model, z0, z1 = "calib/retraction/retraction_tower.drc", 0, height
-    proc, fil = dict(speeds(speed), brim_type="no_brim"), {}
+    proc, fil = dict(speeds(speed), **RAFT), {}
     header = f"height={height} speed={speed}"
 elif KIND == "tolerance":
     speed, out = int(ARGS[0]), ARGS[1]
@@ -169,7 +175,20 @@ shutil.rmtree(f"{WORK}/out", ignore_errors=True)
 subprocess.run([ORCA_BIN, "--load-settings", "machine.json;process.json",
                 "--load-filaments", "filament.json", "--arrange", "0", "--orient", "0",
                 "--slice", "0", "--outputdir", "out", f"{KIND}.stl"], cwd=WORK, check=True)
+sliced = open(f"{WORK}/out/plate_1.gcode").read()
+if KIND in ("temp", "retract"):
+    # the model starts at the first layer after the raft: the Z of the first non-support feature
+    zs, model_z = None, None
+    for l in sliced.splitlines():
+        if l.startswith(";Z:"):
+            zs = float(l[3:])
+        elif l.startswith(";TYPE:") and zs is not None and "upport" not in l and "aft" not in l and model_z is None:
+            model_z = zs
+    if model_z is None:
+        sys.exit("no model layer found above the raft")
+    layer = float(process.get("layer_height", "0.2"))
+    header += f" raft={model_z - layer:.3f}"         # Z of the raft top + contact gap = model Z0
 with open(out, "w") as o:
     o.write(f"; orca calib {KIND} {header}\n")
-    o.write(open(f"{WORK}/out/plate_1.gcode").read())
+    o.write(sliced)
 print(f"{out}: {KIND} {header}")
