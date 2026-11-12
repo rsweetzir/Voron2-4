@@ -90,8 +90,10 @@ PROFILES = {
     "TPU":      dict(bed=70, temps=[250, 245, 240, 235, 230, 225, 220], fan=255,
                      rspeed=30, start_retract=0.0, vmax=24, v0=2, speed_step=1, tower_retract=0.0,
                      pa=[0.0, 0.02, 0.04, 0.06, 0.08, 0.10, 0.12, 0.14, 0.16]),
-    "ASA_OVERTURE": dict(bed=100, temps=[270, 265, 260, 255, 250, 245, 240], fan=0,
-                     rspeed=40, start_retract=0.5, vmax=50, tower_brim=15, bridge_speed=25, overhang_fan=40),
+    # Overture ASA on Las Vegas: 30% fan everywhere, 100% on bridges/overhangs. With the fan off
+    # (40% on overhangs only) the small towers came out as mush at every temperature (2026-11-11).
+    "ASA_OVERTURE": dict(bed=100, temps=[270, 265, 260, 255, 250, 245, 240], fan=77,
+                     rspeed=40, start_retract=0.5, vmax=50, tower_brim=15, bridge_speed=25, overhang_fan=100),
     "ASA":      dict(bed=105, temps=[260, 255, 250, 245, 240, 235, 230], fan=0,
                      rspeed=40, start_retract=0.5, vmax=100, tower_brim=15, bridge_speed=25, overhang_fan=40),
 }

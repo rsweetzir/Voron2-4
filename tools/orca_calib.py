@@ -54,6 +54,13 @@ if KIND == "temp":
     model, z0, z1 = "calib/temperature_tower/temperature_tower.drc", (500 - high) / 5 * 10, (500 - low) / 5 * 10 + 10
     brim = os.environ.get("CALSUITE_TOWER_BRIM", "5")     # mm; calsuite.sh sets it per material (ASA 15)
     proc, fil = dict(speeds(speed), brim_type="outer_only", brim_width=brim), {}
+    # Tall, thin tower (44 x 9 mm, 70 mm): the nozzle knocked it loose on fast travel twice (ASA,
+    # Las Vegas 2026-11-11; curled overhang edges + 0.4 mm hop + 500 mm/s travel moves). Slower,
+    # gentler travel, a higher hop, and travel that goes around the walls instead of over them.
+    proc.update(travel_speed="120", travel_acceleration="1500", reduce_crossing_wall="1",
+                max_travel_detour_distance="0")
+    fil.update(filament_z_hop=["0.8"], filament_z_hop_types=["Normal Lift"],
+               filament_retract_lift_enforce=["All Surfaces"])
     # Optional per material (calsuite.sh, from the profile): slower bridges/overhangs, and a fan
     # only on bridges and steep overhangs (general cooling off), e.g. ASA
     bs = os.environ.get("CALSUITE_BRIDGE_SPEED")
@@ -64,7 +71,8 @@ if KIND == "temp":
                     overhang_4_4_speed=str(max(b * 2 // 5, 5)))
     of = os.environ.get("CALSUITE_OVERHANG_FAN")
     if of:
-        fil.update(fan_min_speed=["0"], fan_max_speed=["0"], overhang_fan_speed=[of],
+        gf = os.environ.get("CALSUITE_FAN", "0")       # general fan % (profile fan), e.g. ASA 30
+        fil.update(fan_min_speed=[gf], fan_max_speed=[gf], overhang_fan_speed=[of],
                    enable_overhang_bridge_fan=["1"], overhang_fan_threshold=["50%"])
     header = f"high={high} low={low} speed={speed} brim={brim}"
 elif KIND == "speed":
