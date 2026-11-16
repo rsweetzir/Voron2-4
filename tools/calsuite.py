@@ -94,6 +94,10 @@ PROFILES = {
     # (40% on overhangs only) the small towers came out as mush at every temperature (2026-11-11).
     "ASA_OVERTURE": dict(bed=100, temps=[270, 265, 260, 255, 250, 245, 240], fan=77,
                      rspeed=40, start_retract=0.5, vmax=50, tower_brim=15, bridge_speed=25, overhang_fan=100),
+    # Frucindra ASA black (2 kg, 2026-11-14; label 230-260C, bed 100-120C): Overture's setup, towers
+    # across the label range
+    "ASA_FRUCINDRA": dict(bed=100, temps=[260, 255, 250, 245, 240, 235, 230], fan=77,
+                     rspeed=40, start_retract=0.5, vmax=50, tower_brim=15, bridge_speed=25, overhang_fan=100),
     "ASA":      dict(bed=105, temps=[260, 255, 250, 245, 240, 235, 230], fan=0,
                      rspeed=40, start_retract=0.5, vmax=100, tower_brim=15, bridge_speed=25, overhang_fan=40),
 }

@@ -54,12 +54,15 @@ def speeds(v):
 # tower's temperature/retraction bands from the top of the raft.
 RAFT = dict(raft_layers="3", raft_first_layer_expansion="4", raft_expansion="2", raft_contact_distance="0.2",
             brim_type="no_brim")
+# The 70 mm temperature tower gets a wider raft: with 4/2 mm it lifted off the bed (Frucindra ASA,
+# 2026-11-14). The retraction tower keeps 4/2 (it sits at the back edge of a 350 bed).
+RAFT_TOWER = dict(RAFT, raft_first_layer_expansion="8", raft_expansion="5")
 
 if KIND == "temp":
     high, low, speed, out = int(ARGS[0]), int(ARGS[1]), int(ARGS[2]), ARGS[3]
     model, z0, z1 = "calib/temperature_tower/temperature_tower.drc", (500 - high) / 5 * 10, (500 - low) / 5 * 10 + 10
     brim = "0"                                           # a raft instead of a brim (see RAFT below)
-    proc, fil = dict(speeds(speed), **RAFT), {}
+    proc, fil = dict(speeds(speed), **RAFT_TOWER), {}
     # Tall, thin tower (44 x 9 mm, 70 mm): the nozzle knocked it loose on fast travel twice (ASA,
     # Las Vegas 2026-11-11; curled overhang edges + 0.4 mm hop + 500 mm/s travel moves). Slower,
     # gentler travel, a higher hop, and travel that goes around the walls instead of over them.

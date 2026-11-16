@@ -1,0 +1,98 @@
+{
+    "from": "User",
+    "inherits": "Generic ASA template @Voron Voron 2.4 300 0.4 nozzle",
+    "name": "Vegas Frucindra ASA",
+    "filament_settings_id": [
+        "Vegas Frucindra ASA"
+    ],
+    "version": "2.4.0.2",
+    "nozzle_temperature": [
+        "240"
+    ],
+    "nozzle_temperature_initial_layer": [
+        "240"
+    ],
+    "cool_plate_temp": [
+        "110"
+    ],
+    "eng_plate_temp": [
+        "110"
+    ],
+    "hot_plate_temp": [
+        "110"
+    ],
+    "textured_plate_temp": [
+        "110"
+    ],
+    "cool_plate_temp_initial_layer": [
+        "110"
+    ],
+    "eng_plate_temp_initial_layer": [
+        "110"
+    ],
+    "hot_plate_temp_initial_layer": [
+        "110"
+    ],
+    "textured_plate_temp_initial_layer": [
+        "110"
+    ],
+    "fan_min_speed": [
+        "30"
+    ],
+    "fan_max_speed": [
+        "30"
+    ],
+    "enable_overhang_bridge_fan": [
+        "1"
+    ],
+    "overhang_fan_speed": [
+        "100"
+    ],
+    "overhang_fan_threshold": [
+        "50%"
+    ],
+    "close_fan_the_first_x_layers": [
+        "3"
+    ],
+    "filament_max_volumetric_speed": [
+        "16"
+    ],
+    "filament_flow_ratio": [
+        "1.02"
+    ],
+    "enable_pressure_advance": [
+        "0"
+    ],
+    "filament_start_gcode": [
+        "; Frucindra ASA black on Vegas (2 kg, lot 0706PR6D07; calibration suite v5, 2026-11-14): 240C, max 16 mm3/s (extruder clicked at 22), flow 102%, PA 0.04, retract 0.2 @ 40, tolerance 0.1 mm; bed 110C (plates warped across the front of the bed at 100C, 2026-11-14); fan 30%, 100% on overhangs/bridges. Temperature tower lifted off its raft at 245C (bed 100C). Klipper owns PA and retraction\nSET_PRESSURE_ADVANCE ADVANCE=0.04\nSET_RETRACTION RETRACT_LENGTH=0.2 RETRACT_SPEED=40 UNRETRACT_SPEED=30\nSET_GCODE_VARIABLE MACRO=_AFTER_LAYER VARIABLE=exhaust_from_layer2 VALUE=0.25   ; strong smell: exhaust 25% after the first layer"
+    ],
+    "compatible_prints": [
+        "Voron 0.20mm ASA"
+    ],
+    "compatible_prints_condition": "",
+    "filament_z_hop": [
+        "0.2"
+    ],
+    "filament_z_hop_types": [
+        "Spiral Lift"
+    ],
+    "filament_retract_lift_enforce": [
+        "Top Only"
+    ],
+    "filament_retract_when_changing_layer": [
+        "1"
+    ],
+    "filament_vendor": [
+        "Frucindra"
+    ],
+    "compatible_printers": [
+        "Voron 2.4 350 0.6 Vegas"
+    ],
+    "compatible_printers_condition": "",
+    "filament_wipe": [
+        "1"
+    ],
+    "filament_wipe_distance": [
+        "1.5"
+    ]
+}
