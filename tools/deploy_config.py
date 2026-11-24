@@ -10,7 +10,7 @@ Pushes the SHARED macros (klipper/shared/ -> config/shared/) and that printer's 
   - the masked MCU serials (<MCU_SERIAL>) are filled back in from the printer's current files
   - each printer.cfg keeps the printer's own SAVE_CONFIG block (#*# ...): calibrations saved on
     the printer are never overwritten by an older copy in the repo
-  - every file that changes is backed up first to config/backup-<date>-deploy/, and files the
+  - every file that changes is backed up first to config/backups/backup-<date>-deploy/, and files the
     repo no longer has (OBSOLETE) are moved there instead of deleted
   - refuses while the printer is printing or paused
 --dry-run shows the diffs only. --restart restarts Klipper afterwards and reports its state.
@@ -93,7 +93,7 @@ if not changes and not gone:
 if DRY:
     sys.exit(0)
 
-backup = time.strftime("backup-%Y%m%d_%H%M%S-deploy")
+backup = time.strftime("backups/backup-%Y%m%d_%H%M%S-deploy")   # all backups in config/backups/ (2026-11-16)
 ssh(f"cd printer_data/config && mkdir -p {backup}/shared shared")
 for path, new in changes:
     ssh(f"cd printer_data/config && {{ [ -e {path} ] && cp {path} {backup}/{path} || true; }} && cat > {path}", new)

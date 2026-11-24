@@ -90,8 +90,8 @@ elif KIND == "speed":
     model, z0, z1 = "calib/volumetric_speed/SpeedTestStructure.drc", 0, height
     proc = dict(speeds(50), layer_height=str(lh), initial_layer_print_height=str(lh),
                 outer_wall_line_width=str(lw), wall_loops="1", top_shell_layers="0", bottom_shell_layers="1",
-                sparse_infill_density="0%", spiral_mode="1", enable_overhang_speed="0",
-                brim_type="outer_and_inner", brim_width="3")
+                sparse_infill_density="0%", spiral_mode="1", enable_overhang_speed="0", **RAFT)
+    # on a raft (was a 3 mm inner+outer brim): the Frucindra 260C test lifted at 31 mm3/s (2026-11-17)
     fil = dict(filament_max_volumetric_speed=["200"], slow_down_layer_time=["0"])
     header = f"height={height} scale={scale} layer={lh} line={lw}"
 elif KIND == "retract":
@@ -179,7 +179,7 @@ subprocess.run([ORCA_BIN, "--load-settings", "machine.json;process.json",
                 "--load-filaments", "filament.json", "--arrange", "0", "--orient", "0",
                 "--slice", "0", "--outputdir", "out", f"{KIND}.stl"], cwd=WORK, check=True)
 sliced = open(f"{WORK}/out/plate_1.gcode").read()
-if KIND in ("temp", "retract"):
+if KIND in ("temp", "retract", "speed"):
     # the model starts at the first layer after the raft: the Z of the first non-support feature
     zs, model_z = None, None
     for l in sliced.splitlines():

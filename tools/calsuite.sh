@@ -1,11 +1,11 @@
 #!/bin/sh
 # SPDX-License-Identifier: MIT  (c) 2026 The Voron2-4 authors, see LICENSE
 # Build the filament calibration suite: slice the OrcaSlicer models (orca_calib.py), then
-# write the one-plate G-code (calsuite.py) and upload it to the printer (not started).
+# write the one-plate G-code (calsuite.py) into the synced print-file folder (not started).
 #   tools/calsuite.sh MATERIAL NAME [FROM=pa TEMP=210 MAX_FLOW=14 ...]
 #     e.g. tools/calsuite.sh PLA_PLUS Duramic_PLA_Plus
 #     FROM= resumes at a later test with the earlier answers (see calsuite.py)
-#     OUT_DIR=dir tools/calsuite.sh ...  writes the G-code to dir instead of uploading it
+#     OUT_DIR=dir tools/calsuite.sh ...  writes the G-code to dir instead of the synced folder
 #     PRINTER=vegas tools/calsuite.sh ...  the Las Vegas Voron (350mm bed, 0.6mm nozzle)
 # MATERIAL is a calsuite.py PROFILES key. Needs OrcaSlicer (macOS app or Linux snap, see
 # orca_calib.py) and a Python with DracoPy, manifold3d and numpy ($CALSUITE_PYTHON, default
@@ -56,10 +56,11 @@ sed -i.bak '1s/^; orca calib temp /; orca calib temp_fine /' "$WORK/temp_fine.gc
 FROM=$(printf '%s\n' "$@" | sed -n 's/^FROM=//p' | tr 'A-Z' 'a-z')
 OUT="$WORK/${NAME}_calibration_suite_v5${FROM:+_from_$FROM}.gcode"
 python3 calsuite.py "$MAT" "$OUT" "$NAME" "$WORK" "$@"
-if [ -n "$OUT_DIR" ]; then
-    cp "$OUT" "$OUT_DIR"/
-    echo "Wrote $OUT_DIR/$(basename "$OUT") (not uploaded)."
-else
-    curl -sf -F "file=@$OUT" "http://${PRINTER_HOST:-192.168.5.240}/server/files/upload" > /dev/null
-    echo "Uploaded $(basename "$OUT") to the printer (not started)."
-fi
+# Never upload straight to a printer (repository owner's rule, 2026-11-16): files go into the Mac's
+# synced print-file tree, ~/voron-gcodes/<LasVegas|Edmonton>/Calibration/calsuite/, and
+# sync_to_printer.sh mirrors that to the printer's gcodes/Calibration/calsuite/. OUT_DIR overrides.
+case "${PRINTER:-edmonton}" in vegas) LOC=LasVegas ;; *) LOC=Edmonton ;; esac
+OUT_DIR=${OUT_DIR:-$HOME/voron-gcodes/$LOC/Calibration/calsuite}
+mkdir -p "$OUT_DIR"
+cp "$OUT" "$OUT_DIR"/
+echo "Wrote $OUT_DIR/$(basename "$OUT") (synced to the printer's gcodes/Calibration/calsuite/; not started)."

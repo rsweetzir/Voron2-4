@@ -47,6 +47,8 @@ ORCA_DIR = sys.argv[4]
 EXTRA = dict(a.split("=", 1) for a in sys.argv[5:])
 SECTIONS = ["temp", "speed", "pa", "flow", "retract", "tolerance"]   # print order
 FROM = EXTRA.pop("FROM", "temp").lower()
+# ONLY=1 (with FROM=): print just that one test, then end (e.g. FROM=speed ONLY=1: max flow at a new TEMP)
+ONLY = EXTRA.pop("ONLY", "0") == "1"
 # Second (fine) temperature tower: it needs its own row behind the first, which a 300mm bed has
 # no room for. FINE=1 / FINE=0 force it on / off; by default it is on for beds of 340mm and up
 FINE_ON = {"1": True, "0": False}.get(EXTRA.pop("FINE", ""), float(os.environ.get("CALSUITE_BED", "300")) >= 340)
@@ -96,8 +98,9 @@ PROFILES = {
                      rspeed=40, start_retract=0.5, vmax=50, tower_brim=15, bridge_speed=25, overhang_fan=100),
     # Frucindra ASA black (2 kg, 2026-11-14; label 230-260C, bed 100-120C): Overture's setup, towers
     # across the label range
-    "ASA_FRUCINDRA": dict(bed=100, temps=[260, 255, 250, 245, 240, 235, 230], fan=77,
-                     rspeed=40, start_retract=0.5, vmax=50, tower_brim=15, bridge_speed=25, overhang_fan=100),
+    # bed 115 / fan 0 / overhang 25%: the Gridfinity production conditions (2026-11-19; was bed 100, fan 30%)
+    "ASA_FRUCINDRA": dict(bed=115, temps=[260, 255, 250, 245, 240, 235, 230], fan=0,
+                     rspeed=40, start_retract=0.5, vmax=50, tower_brim=15, bridge_speed=25, overhang_fan=25),
     "ASA":      dict(bed=105, temps=[260, 255, 250, 245, 240, 235, 230], fan=0,
                      rspeed=40, start_retract=0.5, vmax=100, tower_brim=15, bridge_speed=25, overhang_fan=40),
 }
@@ -407,6 +410,12 @@ if FINE_ON:
         ROW[k] += shift
     FINE = Orca("temp_fine", OFF + 150, ROW["fine"])
 SPEED = Orca("speed", OFF + 150, ROW["speed"])
+if ONLY and FROM == "speed":
+    # alone on the bed: as far back as possible (owner's request 2026-11-17), raft/brim edge
+    # 25 mm from the back edge, like the Gridfinity parts (the front of the bed runs coolest)
+    edge = (SPEED.brim or SPEED.foot)[2][1]
+    ROW["speed"] += (BED - 25.0) - edge
+    SPEED = Orca("speed", OFF + 150, ROW["speed"])
 RETRACT = Orca("retract", OFF + 80, ROW["last"])
 TOL = Orca("tolerance", OFF + 165, ROW["last"])
 
@@ -415,8 +424,8 @@ if TOWER_TEMPS != P["temps"]:
     sys.exit(f"temp.gcode has blocks {TOWER_TEMPS}, profile {MAT} wants {P['temps']}")
 if FINE_ON and abs(FINE.top - 10 * len(FINE_OFFSETS)) > 0.3:
     sys.exit(f"temp_fine.gcode is {FINE.top}mm tall, want {10 * len(FINE_OFFSETS)} (one 10mm block per offset)")
-if abs(SPEED.height - SPEED_BAND * len(SPEED_VOLS)) > 0.01:
-    sys.exit(f"speed.gcode is {SPEED.height}mm tall, want {SPEED_BAND * len(SPEED_VOLS):.2f}mm")
+if abs(SPEED.top - SPEED_BAND * len(SPEED_VOLS)) > 0.01:
+    sys.exit(f"speed.gcode is {SPEED.top}mm tall, want {SPEED_BAND * len(SPEED_VOLS):.2f}mm")
 if SPEED.height > GANTRY_H:
     sys.exit("speed test is taller than the gantry clearance")
 if RETRACT.top < RETRACT_BASE + RETRACT_BAND * len(RETRACTS) - 0.01:
@@ -492,7 +501,10 @@ def check_clearance(plan):
     if problems:
         sys.exit("Stealthburner clearance check failed:\n  " + "\n  ".join(problems))
 
-check_clearance(PLAN)
+# one test alone on the bed (ONLY=1): only it has to fit (the other sections are generated but cut)
+ONLY_NAMES = {"temp": ("temp_tower", "fine_tower"), "speed": ("max_flow",), "pa": ("pa_triangles",),
+              "flow": ("flow",), "retract": ("retraction",), "tolerance": ("tolerance",)}[FROM]
+check_clearance([e for e in PLAN if e[0] in ONLY_NAMES] if ONLY else PLAN)
 
 def gap_behind(name, extra=6):
     """Y of a travel/wait row just behind a finished test."""
@@ -714,12 +726,18 @@ SECTION_OBJECTS = dict(temp=["temp_tower"] + (["fine_tower"] if FINE_ON else [])
 already = [n for sec in SECTIONS[:SECTIONS.index(FROM)] for n in SECTION_OBJECTS[sec]]
 if FROM != "temp":
     body = out[mark[FROM]:]
+    if ONLY:
+        nxt = SECTIONS[SECTIONS.index(FROM) + 1] if FROM != SECTIONS[-1] else None
+        body = out[mark[FROM]:mark[nxt]] if nxt else body
+        if nxt:
+            body += ["M107", "_CAL_REPORT", "PRINT_END"]
     out[:] = []
     g(f"; {NAME} calibration suite v5 ({MAT}), RESUMED from {FROM} with " + " ".join(f"{k}={v}" for k, v in ANSWERS.items()))
     g(f"; already printed: {', '.join(already)}. START ON AN EMPTY BED: homing, the soak park, QGL and")
     g(";   the purge do not avoid earlier tests (the 70mm tower stands in the QGL path)")
+    keep = SECTION_OBJECTS[FROM] if ONLY else None
     for name, r, h in objects():
-        if name in already:
+        if name in already or (keep is not None and not any(name == k or name.startswith(k.rstrip("s") + "_") for k in keep)):
             continue
         poly = ",".join(f"[{x:.1f},{y:.1f}]" for x, y in r)
         cx = (r[0][0] + r[1][0]) / 2; cy = (r[0][1] + r[2][1]) / 2

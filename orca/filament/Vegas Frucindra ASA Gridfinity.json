@@ -1,0 +1,110 @@
+{
+    "from": "User",
+    "inherits": "Generic ASA template @Voron Voron 2.4 300 0.4 nozzle",
+    "name": "Vegas Frucindra ASA Gridfinity",
+    "filament_settings_id": [
+        "Vegas Frucindra ASA Gridfinity"
+    ],
+    "version": "2.4.0.2",
+    "nozzle_temperature": [
+        "260"
+    ],
+    "nozzle_temperature_initial_layer": [
+        "260"
+    ],
+    "cool_plate_temp": [
+        "120"
+    ],
+    "eng_plate_temp": [
+        "120"
+    ],
+    "hot_plate_temp": [
+        "120"
+    ],
+    "textured_plate_temp": [
+        "120"
+    ],
+    "cool_plate_temp_initial_layer": [
+        "120"
+    ],
+    "eng_plate_temp_initial_layer": [
+        "120"
+    ],
+    "hot_plate_temp_initial_layer": [
+        "120"
+    ],
+    "textured_plate_temp_initial_layer": [
+        "120"
+    ],
+    "fan_min_speed": [
+        "0"
+    ],
+    "fan_max_speed": [
+        "0"
+    ],
+    "enable_overhang_bridge_fan": [
+        "1"
+    ],
+    "overhang_fan_speed": [
+        "25"
+    ],
+    "overhang_fan_threshold": [
+        "50%"
+    ],
+    "close_fan_the_first_x_layers": [
+        "3"
+    ],
+    "filament_max_volumetric_speed": [
+        "15.5"
+    ],
+    "filament_flow_ratio": [
+        "1"
+    ],
+    "enable_pressure_advance": [
+        "0"
+    ],
+    "filament_start_gcode": [
+        "; GRIDFINITY variant (2026-11-17): 250C, bed 115C, part fan OFF on walls, 25% on bridges/steep overhangs, exhaust OFF while printing (PRINT_END vents 10 min); the 3x5 pliers bin printed almost flat this way (only slight outer-corner lift). History: - tall bins warped at the corners and split layers at the edges with 240C / fan 30% / exhaust 25% (chamber averaged 43.5C, dipped to 38C). Base profile: Frucindra ASA black on Vegas (2 kg, lot 0706PR6D07; calibration suite v5, 2026-11-14): 240C, max 16 mm3/s (extruder clicked at 22), flow 102%, PA 0.04, retract 0.2 @ 40, tolerance 0.1 mm; bed 110C (plates warped across the front of the bed at 100C, 2026-11-14); fan 30%, 100% on overhangs/bridges. Temperature tower lifted off its raft at 245C (bed 100C). Klipper owns PA and retraction\nSET_PRESSURE_ADVANCE ADVANCE=0.06   ; recalibrated at 260C, bed 115, fan off (2026-11-19): PA 0.06, flow 100%, retract 0.2@40, tolerance 0.2\nSET_RETRACTION RETRACT_LENGTH=0.2 RETRACT_SPEED=40 UNRETRACT_SPEED=30"
+    ],
+    "compatible_prints": [
+        "Voron 0.20mm ASA"
+    ],
+    "compatible_prints_condition": "",
+    "filament_z_hop": [
+        "0.2"
+    ],
+    "filament_z_hop_types": [
+        "Spiral Lift"
+    ],
+    "filament_retract_lift_enforce": [
+        "Top Only"
+    ],
+    "filament_retract_when_changing_layer": [
+        "1"
+    ],
+    "filament_vendor": [
+        "Frucindra"
+    ],
+    "compatible_printers": [
+        "Voron 2.4 350 0.6 Vegas"
+    ],
+    "compatible_printers_condition": "",
+    "filament_wipe": [
+        "1"
+    ],
+    "filament_wipe_distance": [
+        "2"
+    ],
+    "filament_retraction_length": [
+        "0.2"
+    ],
+    "filament_retraction_speed": [
+        "40"
+    ],
+    "filament_deretraction_speed": [
+        "30"
+    ],
+    "filament_retract_before_wipe": [
+        "0%"
+    ]
+}
