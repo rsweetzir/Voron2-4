@@ -82,3 +82,7 @@ between (the fine pass probes from `qgl_fine_z`, 10 mm).
   `sync-from-printer.sh` again: a sync before the deploy would pull the old, unshared
   `macros.cfg` over the restructured one. The deploy keeps the printer's SAVE_CONFIG block, so
   nothing saved on the printer meanwhile is lost.
+- 2026-11-24: Edmonton deployed onto `shared/` (old macros backed up in its
+  `config/backups/backup-20261124_084346-deploy/`), then synced back. Both printers now run the
+  same shared macros. X/Y travel on Edmonton is 302 (set on the printer 2026-10-17, missed by the
+  restructure); Edmonton's bed setpoint cap is 115 (max_temp 120).
